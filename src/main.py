@@ -1,15 +1,18 @@
 from typing import Final
 import os
+
 from dotenv import load_dotenv
-from discord import Intents, Client, Message
+from discord import Intents, Message
+from discord.ext import commands
 from responses import get_response
+import slash_commands
 
 load_dotenv()
 TOKEN: Final[str] = os.getenv('DISCORD_TOKEN')
 
 intents: Intents = Intents.default()
 intents.message_content = True # NOQA
-client: Client = Client(intents=intents)
+client = commands.Bot(command_prefix="!", intents = intents)
 
 # methods
 async def send_message(message:Message, user_message: str) -> None:
@@ -28,21 +31,14 @@ async def send_message(message:Message, user_message: str) -> None:
 @client.event
 async def on_ready()-> None:
     print(f'{client.user} is running')
-
-#on message event
-@client.event
-async def on_message(message:Message) -> None:
-    if(message.author == client.user):
-        return
-
-    user_name: str = str(message.author)
-    user_message: str = message.content
-    channel: str = str(message.channel)
-
-    print(f'[{channel}] {user_name}: {user_message}')
-    await send_message(message, user_message)
+    try:
+        synced = await client.tree.sync()
+        print(f'Synced {len(synced)} commands(s)')
+    except Exception as e:
+        print(e)
 
 #main
+slash_commands.setup(client)
 def main() -> None:
     client.run(token=TOKEN)
 
