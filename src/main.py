@@ -5,10 +5,10 @@ from dotenv import load_dotenv
 from discord import Intents, Message
 from discord.ext import commands
 from responses import get_response
-import slash_commands
+from src import slash_commands
 
 load_dotenv()
-TOKEN: Final[str] = os.getenv('DISCORD_TOKEN')
+DISCORD_TOKEN: Final[str] = os.getenv('DISCORD_TOKEN')
 
 intents: Intents = Intents.default()
 intents.message_content = True # NOQA
@@ -40,7 +40,7 @@ async def on_ready()-> None:
 #main
 slash_commands.setup(client)
 def main() -> None:
-    client.run(token=TOKEN)
+    client.run(token=DISCORD_TOKEN)
 
 if __name__ == '__main__':
     main()
