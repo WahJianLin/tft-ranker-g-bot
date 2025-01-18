@@ -43,7 +43,6 @@ async def on_ready() -> None:
 # main
 slash_commands.setup(client)
 
-
 def main() -> None:
     client.run(token=DISCORD_TOKEN)
 

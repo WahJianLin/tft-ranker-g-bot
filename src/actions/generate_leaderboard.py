@@ -9,7 +9,6 @@ from datetime import datetime
 
 load_dotenv()
 
-
 class RIOT_TIERS(Enum):
     IRON = 100000000
     BRONZE = 200000000
@@ -51,11 +50,12 @@ LEADER_BOARD_TITLE = 'Leaderboard rank: '
 
 GET_RANK_DATA_URL = 'https://{}.api.riotgames.com/tft/league/v1/entries/by-summoner/{}?api_key={}'
 
+total_api_calls = 0
+
 
 def get_ranks() -> None:
     print(RIOT_API_KEY)
     with open('resources\\processedPlayers.json', 'r') as file:
-        # with open('resources\processedPlayers.json', 'r') as file:
         data = json.load(file)
     for p in data:
         get_rank_data(p[SUMMONER_NAME_JSON_VAL], p[SUMMONER_ID_JSON_VAL], p[SERVER_JSON_VAL])
@@ -64,13 +64,16 @@ def get_ranks() -> None:
 def get_rank_data(summoner_name: str, summoner_id: int, server: str) -> None:
     # Define the API endpoint URL
     url = GET_RANK_DATA_URL.format(server, summoner_id, RIOT_API_KEY)
-
+    global total_api_calls
+    total_api_calls += 1
     print('user', summoner_name)
     try:
         response = requests.get(url)
-        print(response.status_code)
+        print(len(leaderboard))
 
+        print(response.status_code)
         print(response.text)
+
         if response.status_code == 200:
             body = response.json()
             body_len = len(body)
@@ -114,10 +117,23 @@ def generate_leaderboard_display() -> str:
     leaderboard_str += '-' * 30 + '\n'
     rank_pos = 0
     last_rank_val = -1
-    for entry in leaderboard:
+    print("-"*30)
+    print(len(leaderboard))
+    print(leaderboard)
+    final_leaderboard = []
+
+    for val in leaderboard:
+
+        # Check if the value is not already in 'res'
+        if val not in final_leaderboard:
+            # If not present, append it to 'res'
+            final_leaderboard.append(val)
+
+    print(final_leaderboard)
+    for entry in final_leaderboard:
         if last_rank_val != entry[TFT_RANK_VALUE]:
             rank_pos += 1
-        entry_detail = f'{rank_pos}) {entry[SUMMONER_NAME]}    {entry[TFT_RANK_TITLE]}\n'
+        entry_detail = f'{rank_pos}) {entry[SUMMONER_NAME].split('#')[0]}    {entry[TFT_RANK_TITLE]}\n'
         leaderboard_str += entry_detail
     leaderboard_str += '-' * 30
     print(leaderboard_str)
