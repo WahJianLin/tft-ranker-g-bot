@@ -5,10 +5,12 @@ import requests
 from dotenv import load_dotenv
 from enum import Enum
 from typing import Final
+from datetime import datetime
 
 load_dotenv()
 
-class TIER(Enum):
+
+class RIOT_TIERS(Enum):
     IRON = 100000000
     BRONZE = 200000000
     SILVER = 300000000
@@ -19,31 +21,56 @@ class TIER(Enum):
     MASTER = 800000000
     GRAND_MASTER = 900000000
     CHALLENGER = 1000000000
-class RANK(Enum):
+
+
+class RIOT_RANKS(Enum):
     IV = 100000
     III = 200000
     II = 300000
     I = 400000
 
+
 leaderboard = []
-RANKED_QUEUE_TYPE = 'RANKED_TFT'
 RIOT_API_KEY: Final[str] = os.getenv('RIOT_API_KEY')
 
-def get_ranks() -> None:
+RANKED_QUEUE_TYPE = 'RANKED_TFT'
 
+# CONSTANTS names
+SUMMONER_ID_JSON_VAL = 'summonerId'
+SUMMONER_NAME_JSON_VAL = 'summonerName'
+SERVER_JSON_VAL = 'server'
+TIER = 'tier'
+RANK = 'rank'
+LEAGUE_POINTS = 'leaguePoints'
+TFT_RANK_VALUE = 'tft_rank_value'
+TFT_RANK_TITLE ='tft_rank_title'
+QUEUE_TYPE = 'queueType'
+SUMMONER_NAME = 'summoner_name'
+
+LEADER_BOARD_TITLE = 'Leaderboard rank: '
+
+GET_RANK_DATA_URL = 'https://{}.api.riotgames.com/tft/league/v1/entries/by-summoner/{}?api_key={}'
+
+
+def get_ranks() -> None:
     print(RIOT_API_KEY)
-    with open('actions\processedPlayers.json', 'r') as file:
+    with open('resources\\processedPlayers.json', 'r') as file:
+        # with open('resources\processedPlayers.json', 'r') as file:
         data = json.load(file)
     for p in data:
-        get_rank_data(p['summonerName'],p['summonerId'])
+        get_rank_data(p[SUMMONER_NAME_JSON_VAL], p[SUMMONER_ID_JSON_VAL], p[SERVER_JSON_VAL])
 
-def get_rank_data(summoner_name: str, summoner_id: int)->None:
+
+def get_rank_data(summoner_name: str, summoner_id: int, server: str) -> None:
     # Define the API endpoint URL
-    url = f'https://na1.api.riotgames.com/tft/league/v1/entries/by-summoner/{summoner_id}?api_key={RIOT_API_KEY}'
+    url = GET_RANK_DATA_URL.format(server, summoner_id, RIOT_API_KEY)
 
+    print('user', summoner_name)
     try:
         response = requests.get(url)
+        print(response.status_code)
 
+        print(response.text)
         if response.status_code == 200:
             body = response.json()
             body_len = len(body)
@@ -52,46 +79,52 @@ def get_rank_data(summoner_name: str, summoner_id: int)->None:
                 rank_data = None
                 # checks to see if players have played normal tft ranked
                 while rank_data is None and body_len > 0:
-                    if body[body_len-1]['queueType']==RANKED_QUEUE_TYPE:
-                        rank_data = body[body_len-1]
-                    body_len-=1
-                tier: str = rank_data['tier'] #gets metal rank like iron or bronze
-                rank: str = rank_data['rank'] #gets rank subdivision
-                points: int = rank_data['leaguePoints'] #gets lp value
+                    if body[body_len - 1][QUEUE_TYPE] == RANKED_QUEUE_TYPE:
+                        rank_data = body[body_len - 1]
+                    body_len -= 1
+                tier: str = rank_data[TIER]  # gets metal rank like iron or bronze
+                rank: str = rank_data[RANK]  # gets rank subdivision
+                points: int = rank_data[LEAGUE_POINTS]  # gets lp value
 
                 tft_rank_title = f'{tier} {rank} {points} LP'
-                tft_rank_value = TIER[tier].value + RANK[rank].value + points
-                entry = {"summoner_name":summoner_name, "tft_rank_title" : tft_rank_title, "tft_rank_value": tft_rank_value}
+                tft_rank_value = RIOT_TIERS[tier].value + RIOT_RANKS[rank].value + points
+                entry = {SUMMONER_NAME: summoner_name, TFT_RANK_TITLE: tft_rank_title,
+                         TFT_RANK_VALUE: tft_rank_value}
 
                 leaderboard.append(entry)
             return None
         else:
-            print('Error:', response.status_code)
+            print('Error get_rank_data:', response.status_code)
             return None
     except requests.exceptions.RequestException as e:
 
         # Handle any network-related errors or exceptions
-        print('Error:', e)
+        print('Error get_rank_data:', e)
         return None
 
 
-def sort_leaderboard()->None:
-    leaderboard.sort(key=lambda x: x['tft_rank_value'], reverse=True)
+def sort_leaderboard() -> None:
+    leaderboard.sort(key=lambda x: x[TFT_RANK_VALUE], reverse=True)
 
-def generate_leaderboard_display()->str:
-    leaderboard_str = "\n-"*30
+
+def generate_leaderboard_display() -> str:
+    now = datetime.now()
+    dt_string = now.strftime('%B %d, %Y %I:%M:%S %p')
+    leaderboard_str = LEADER_BOARD_TITLE + dt_string + '\n'
+    leaderboard_str += '-' * 30 + '\n'
     rank_pos = 0
     last_rank_val = -1
     for entry in leaderboard:
-        if last_rank_val != entry['tft_rank_value']:
-            rank_pos+=1
-        entry_detail = f'{rank_pos}) {entry['summoner_name']}    {entry['tft_rank_title']}\n'
-        leaderboard_str+=entry_detail
-    leaderboard_str+="-"*30
+        if last_rank_val != entry[TFT_RANK_VALUE]:
+            rank_pos += 1
+        entry_detail = f'{rank_pos}) {entry[SUMMONER_NAME]}    {entry[TFT_RANK_TITLE]}\n'
+        leaderboard_str += entry_detail
+    leaderboard_str += '-' * 30
     print(leaderboard_str)
     return leaderboard_str
 
-def get_leaderboard_result()->str:
+
+def get_leaderboard_result() -> str:
     get_ranks()
     sort_leaderboard()
     return generate_leaderboard_display()

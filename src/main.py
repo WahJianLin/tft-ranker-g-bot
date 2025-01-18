@@ -11,11 +11,12 @@ load_dotenv()
 DISCORD_TOKEN: Final[str] = os.getenv('DISCORD_TOKEN')
 
 intents: Intents = Intents.default()
-intents.message_content = True # NOQA
-client = commands.Bot(command_prefix="!", intents = intents)
+intents.message_content = True  # NOQA
+client = commands.Bot(command_prefix="!", intents=intents)
+
 
 # methods
-async def send_message(message:Message, user_message: str) -> None:
+async def send_message(message: Message, user_message: str) -> None:
     if not user_message:
         print('failed message')
         return
@@ -26,10 +27,11 @@ async def send_message(message:Message, user_message: str) -> None:
     except Exception as e:
         print(e)
 
+
 # starting bot
 
 @client.event
-async def on_ready()-> None:
+async def on_ready() -> None:
     print(f'{client.user} is running')
     try:
         synced = await client.tree.sync()
@@ -37,10 +39,14 @@ async def on_ready()-> None:
     except Exception as e:
         print(e)
 
-#main
+
+# main
 slash_commands.setup(client)
+
+
 def main() -> None:
     client.run(token=DISCORD_TOKEN)
+
 
 if __name__ == '__main__':
     main()
