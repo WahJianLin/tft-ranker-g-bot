@@ -29,7 +29,6 @@ class RIOT_RANKS(Enum):
     I = 400000
 
 
-leaderboard = []
 RIOT_API_KEY: Final[str] = os.getenv('RIOT_API_KEY')
 
 RANKED_QUEUE_TYPE = 'RANKED_TFT'
@@ -38,6 +37,7 @@ RANKED_QUEUE_TYPE = 'RANKED_TFT'
 SUMMONER_ID_JSON_VAL = 'summonerId'
 SUMMONER_NAME_JSON_VAL = 'summonerName'
 SERVER_JSON_VAL = 'server'
+DISPLAY_NAME_JSON_VAL = 'displayName'
 TIER = 'tier'
 RANK = 'rank'
 LEAGUE_POINTS = 'leaguePoints'
@@ -45,6 +45,7 @@ TFT_RANK_VALUE = 'tft_rank_value'
 TFT_RANK_TITLE ='tft_rank_title'
 QUEUE_TYPE = 'queueType'
 SUMMONER_NAME = 'summoner_name'
+DISPLAY_NAME = 'display_name'
 
 LEADER_BOARD_TITLE = 'Leaderboard rank: '
 
@@ -53,15 +54,18 @@ GET_RANK_DATA_URL = 'https://{}.api.riotgames.com/tft/league/v1/entries/by-summo
 total_api_calls = 0
 
 
+leaderboard = []
+
+
 def get_ranks() -> None:
     print(RIOT_API_KEY)
     with open('resources\\processedPlayers.json', 'r') as file:
         data = json.load(file)
     for p in data:
-        get_rank_data(p[SUMMONER_NAME_JSON_VAL], p[SUMMONER_ID_JSON_VAL], p[SERVER_JSON_VAL])
+        get_rank_data(p[SUMMONER_NAME_JSON_VAL], p[SUMMONER_ID_JSON_VAL], p[SERVER_JSON_VAL], p[DISPLAY_NAME_JSON_VAL])
 
 
-def get_rank_data(summoner_name: str, summoner_id: int, server: str) -> None:
+def get_rank_data(summoner_name: str, summoner_id: int, server: str, display_name: str) -> None:
     # Define the API endpoint URL
     url = GET_RANK_DATA_URL.format(server, summoner_id, RIOT_API_KEY)
     global total_api_calls
@@ -92,7 +96,7 @@ def get_rank_data(summoner_name: str, summoner_id: int, server: str) -> None:
                 tft_rank_title = f'{tier} {rank} {points} LP'
                 tft_rank_value = RIOT_TIERS[tier].value + RIOT_RANKS[rank].value + points
                 entry = {SUMMONER_NAME: summoner_name, TFT_RANK_TITLE: tft_rank_title,
-                         TFT_RANK_VALUE: tft_rank_value}
+                         TFT_RANK_VALUE: tft_rank_value, DISPLAY_NAME: display_name}
 
                 leaderboard.append(entry)
             return None
@@ -133,7 +137,7 @@ def generate_leaderboard_display() -> str:
     for entry in final_leaderboard:
         if last_rank_val != entry[TFT_RANK_VALUE]:
             rank_pos += 1
-        entry_detail = f'{rank_pos}) {entry[SUMMONER_NAME].split('#')[0]}    {entry[TFT_RANK_TITLE]}\n'
+        entry_detail = f'{rank_pos}) {entry[DISPLAY_NAME]}    {entry[TFT_RANK_TITLE]}\n'
         leaderboard_str += entry_detail
     leaderboard_str += '-' * 30
     print(leaderboard_str)
