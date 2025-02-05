@@ -35,7 +35,7 @@ def get_unprocessed_player_by_summoner_name(summoner_name: str) -> tuple[Any, ..
     conn = db_base_connect()
     db_cursor = conn.cursor()
 
-    db_cursor.execute("SELECT * FROM players WHERE summoner_name = {}".format("'"+summoner_name+"'"))
+    db_cursor.execute("SELECT * FROM players WHERE summoner_name = %s",summoner_name)
     record = db_cursor.fetchone()
 
     db_cursor.close()
@@ -53,10 +53,12 @@ def insert_unprocessed_players(player: Player) -> None:
         )
         db_cursor.execute(
         "INSERT INTO public.players(summoner_name, display_name, region, server, join_date, "
-              "is_processed, processed_date) VALUES (?, ?, ?, ?, ?, ?, ?)",
+              "is_processed, processed_date) VALUES (%s, %s, %s, %s, %s, %s, %s)",
               values
         )
         conn.commit()
         print("Records created successfully")
         db_cursor.close()
         conn.close()
+    else:
+        print("Player already registered")
