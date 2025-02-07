@@ -57,8 +57,8 @@ def insert_unprocessed_players(player: Player) -> None:
               values
         )
         conn.commit()
-        print("Records created successfully")
+        print("Success: Player Registered")
         db_cursor.close()
         conn.close()
     else:
-        print("Player already registered")
+        print("Failed: Player already registered")

@@ -1,11 +1,14 @@
 import json
 import os
 import requests
+from discord import app_commands
 
 from dotenv import load_dotenv
 from enum import Enum
 from typing import Final
-from datetime import datetime
+from datetime import datetime, date
+
+from src.resources.entity import Player, PlayerDataRes
 
 load_dotenv()
 
@@ -29,6 +32,59 @@ class RIOT_RANKS(Enum):
     I = 400000
 
 
+class SERVER_LOCATION(Enum):
+    BR = 'br'
+    EUNE = 'eune'
+    EUW = 'euw'
+    JP = 'jp'
+    KR = 'kr'
+    LAN = 'lan'
+    LAS = 'las'
+    ME = 'me'
+    NA = 'na'
+    OCE = 'oce'
+    RU = 'ru'
+    SEA = 'sea'
+    TR = 'tr'
+    TW = 'tw'
+    VN = 'vn'
+
+region_map = {
+    SERVER_LOCATION.BR: 'americas',
+    SERVER_LOCATION.EUNE: 'europe',
+    SERVER_LOCATION.EUW: 'europe',
+    SERVER_LOCATION.JP: 'asia',
+    SERVER_LOCATION.KR: 'asia',
+    SERVER_LOCATION.LAN: 'americas',
+    SERVER_LOCATION.LAS: 'americas',
+    SERVER_LOCATION.ME: 'europe',
+    SERVER_LOCATION.NA: 'americas',
+    SERVER_LOCATION.OCE: 'asia',
+    SERVER_LOCATION.RU: 'europe',
+    SERVER_LOCATION.SEA: 'asia',
+    SERVER_LOCATION.TR: 'europe',
+    SERVER_LOCATION.TW: 'asia',
+    SERVER_LOCATION.VN: 'asia',
+}
+
+server_name_map = {
+    SERVER_LOCATION.BR: 'br1',
+    SERVER_LOCATION.EUNE: 'eun1',
+    SERVER_LOCATION.EUW: 'euw1',
+    SERVER_LOCATION.JP: 'jp1',
+    SERVER_LOCATION.KR: 'kr',
+    SERVER_LOCATION.LAN: 'la1',
+    SERVER_LOCATION.LAS: 'la2',
+    SERVER_LOCATION.ME: 'me1',
+    SERVER_LOCATION.NA: 'na1',
+    SERVER_LOCATION.OCE: 'oc1',
+    SERVER_LOCATION.RU: 'ru',
+    SERVER_LOCATION.SEA: 'sg2',
+    SERVER_LOCATION.TR: 'tr1',
+    SERVER_LOCATION.TW: 'tw2',
+    SERVER_LOCATION.VN: 'vn2',
+}
+
 RIOT_API_KEY: Final[str] = os.getenv('RIOT_API_KEY')
 
 RANKED_QUEUE_TYPE = 'RANKED_TFT'
@@ -49,6 +105,8 @@ DISPLAY_NAME = 'display_name'
 
 LEADER_BOARD_TITLE = 'Leaderboard rank: '
 
+GET_ACCOUNT_DATA_URL = 'https://{}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{}/{}?api_key={}'
+
 GET_RANK_DATA_URL = 'https://{}.api.riotgames.com/tft/league/v1/entries/by-summoner/{}?api_key={}'
 
 total_api_calls = 0
@@ -56,6 +114,26 @@ total_api_calls = 0
 
 leaderboard = []
 
+def get_player_data_call(summoner_name: str, location: SERVER_LOCATION) -> PlayerDataRes or None:
+    split_name = summoner_name.split('#')
+    game_name = split_name[0]
+    tag_line = split_name[1]
+    url = GET_ACCOUNT_DATA_URL.format(region_map[location], game_name, tag_line, RIOT_API_KEY)
+    print("calling get_player_data_call on", summoner_name, location)
+    try:
+        response = requests.get(url)
+
+        if response.status_code == 200:
+            body = response.json()
+            print(type(body), body)
+            return PlayerDataRes.from_res(body)
+        else:
+            print('Error api get_player_data_call:', response.status_code, 'Player', game_name, response.content, url)
+            return None
+    except requests.exceptions.RequestException as e:
+
+        print('Error exception in get_player_data_call:', e)
+        return None
 
 def get_ranks() -> None:
     print(RIOT_API_KEY)
@@ -63,7 +141,6 @@ def get_ranks() -> None:
         data = json.load(file)
     for p in data:
         get_rank_data(p[SUMMONER_NAME_JSON_VAL], p[SUMMONER_ID_JSON_VAL], p[SERVER_JSON_VAL], p[DISPLAY_NAME_JSON_VAL])
-
 
 def get_rank_data(summoner_name: str, summoner_id: int, server: str, display_name: str) -> None:
     # Define the API endpoint URL
@@ -148,3 +225,10 @@ def get_leaderboard_result() -> str:
     get_ranks()
     sort_leaderboard()
     return generate_leaderboard_display()
+
+
+def register_tft_race(summoner_name: str, location: SERVER_LOCATION) -> None:
+
+    display_name: str = summoner_name.split("#")[0]
+    player: Player = Player(None, summoner_name, display_name, region_map[location], server_name_map[location], date.today(), False, None)
+    print(player)
