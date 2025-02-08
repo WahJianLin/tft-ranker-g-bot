@@ -5,10 +5,9 @@ from typing import Final
 import requests
 from dotenv import load_dotenv
 
-from src.actions.data_actions import leaderboard
 from src.resources.constants import ServerLocationEnum, REGION_MAP, QUEUE_TYPE, RANKED_QUEUE_TYPE, TIER, RANK, \
     LEAGUE_POINTS, RiotTiersEnum, RiotRanksEnum, SUMMONER_NAME, TFT_RANK_VALUE, TFT_RANK_TITLE, DISPLAY_NAME, \
-    SUMMONER_NAME_JSON_VAL, SUMMONER_ID_JSON_VAL, SERVER_JSON_VAL, DISPLAY_NAME_JSON_VAL
+    SUMMONER_NAME_JSON_VAL, SUMMONER_ID_JSON_VAL, SERVER_JSON_VAL, DISPLAY_NAME_JSON_VAL, SERVER_NAME_MAP
 from src.resources.entity import PlayerDataRes
 
 load_dotenv()
@@ -19,19 +18,22 @@ GET_ACCOUNT_DATA_URL = 'https://{}.api.riotgames.com/riot/account/v1/accounts/by
 
 GET_RANK_DATA_URL = 'https://{}.api.riotgames.com/tft/league/v1/entries/by-summoner/{}?api_key={}'
 
+GET_SUMMONER_DATA_URL = 'https://{}.api.riotgames.com/tft/summoner/v1/summoners/by-puuid/{}?api_key={}'
 
-def get_player_data_call(summoner_name: str, location: ServerLocationEnum) -> PlayerDataRes or None:
+total_api_calls: int = 0
+
+
+def get_player_data_call(summoner_name: str, region: str) -> PlayerDataRes or None:
     split_name = summoner_name.split('#')
     game_name = split_name[0]
     tag_line = split_name[1]
-    url = GET_ACCOUNT_DATA_URL.format(REGION_MAP[location], game_name, tag_line, RIOT_API_KEY)
-    print("calling get_player_data_call on", summoner_name, location)
+    url = GET_ACCOUNT_DATA_URL.format(region, game_name, tag_line, RIOT_API_KEY)
+    print("calling get_player_data_call on", summoner_name, region)
     try:
         response = requests.get(url)
 
         if response.status_code == 200:
             body = response.json()
-            print(type(body), body)
             return PlayerDataRes.from_res(body)
         else:
             print('Error api get_player_data_call:', response.status_code, 'Player', game_name, response.content, url)
@@ -42,7 +44,25 @@ def get_player_data_call(summoner_name: str, location: ServerLocationEnum) -> Pl
         return None
 
 
-def get_rank_data(summoner_name: str, summoner_id: int, server: str, display_name: str) -> None:
+def get_summoner_id_call(puuid: str, server: str) -> str | None:
+    url = GET_SUMMONER_DATA_URL.format(server, puuid, RIOT_API_KEY)
+    try:
+        response = requests.get(url)
+
+        if response.status_code == 200:
+            body = response.json()
+            return body['id']
+        else:
+            print('Error not correct code in get_summoner_id_call:', response.status_code, url)
+            return None
+    except requests.exceptions.RequestException as e:
+
+        # Handle any network-related errors or exceptions
+        print('Error exception in get_summoner_id_call:', e)
+        return None
+
+
+def get_rank_data(summoner_name: str, summoner_id: int, server: str, display_name: str, leaderboard: list) -> None:
     url = GET_RANK_DATA_URL.format(server, summoner_id, RIOT_API_KEY)
     global total_api_calls
     total_api_calls += 1
@@ -85,9 +105,10 @@ def get_rank_data(summoner_name: str, summoner_id: int, server: str, display_nam
         return None
 
 
-def get_ranks() -> None:
+def get_ranks(leaderboard: list) -> None:
     print(RIOT_API_KEY)
     with open('resources\\processedPlayers.json', 'r') as file:
         data = json.load(file)
     for p in data:
-        get_rank_data(p[SUMMONER_NAME_JSON_VAL], p[SUMMONER_ID_JSON_VAL], p[SERVER_JSON_VAL], p[DISPLAY_NAME_JSON_VAL])
+        get_rank_data(p[SUMMONER_NAME_JSON_VAL], p[SUMMONER_ID_JSON_VAL], p[SERVER_JSON_VAL], p[DISPLAY_NAME_JSON_VAL],
+                      leaderboard)

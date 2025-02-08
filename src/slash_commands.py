@@ -5,11 +5,12 @@ import traceback
 import discord
 from discord.ext import commands
 
-from src.actions.data_actions import register_tft_race, get_leaderboard_result
-from src.actions.database import get_unprocessed_player_by_summoner_name
+from src.actions.data_actions import register_player, get_leaderboard_result, process_waitlist
+from src.actions.database import get_player_by_summoner_name
 from src.actions.permission import is_mod
 from src.actions.riot_api import ServerLocationEnum, \
     get_player_data_call
+from src.resources.constants import REGION_MAP
 
 ONLY_MODS: str = "Only Mods can use this command"
 VALID_SUMMONER_NAME_REGEX: str = "\\w#\\w"
@@ -34,12 +35,12 @@ async def join_ranked_race(interaction: discord.Interaction, summoner_name: str,
             await interaction.response.send_message(
                 f"Failure: Invalid Summoner Name {summoner_name}. Summoner_name should match name#tag format",
                 ephemeral=True)
-        elif get_unprocessed_player_by_summoner_name(summoner_name) is not None:
+        elif get_player_by_summoner_name(summoner_name) is not None:
             await interaction.response.send_message(
                 f"Failure: {summoner_name} is already registered.",
                 ephemeral=True)
-        elif get_player_data_call(summoner_name, location):
-            register_tft_race(summoner_name, location)
+        elif get_player_data_call(summoner_name, REGION_MAP[location]):
+            register_player(summoner_name, location)
             await interaction.response.send_message(
                 f"Success: {summoner_name} Registered. Please wait until this Saturday to be officially added into the race",
                 ephemeral=True)
@@ -54,11 +55,16 @@ async def join_ranked_race(interaction: discord.Interaction, summoner_name: str,
 
 
 async def process_registered_players(interaction: discord.Interaction):
-    await interaction.response.send_message("hello ajumma world")
     if is_mod(interaction.user.roles):
-        await interaction.response.send_message("hello ajumma world")
+        await interaction.response.defer()
+        await asyncio.sleep(10)
+        process_waitlist()
+        await interaction.followup.send("Players have been processed into competitors.", ephemeral=True)
     else:
         await interaction.response.send_message(ONLY_MODS, ephemeral=True)
+
+
+
 
 def setup(client: commands.Bot):
     client.tree.add_command(discord.app_commands.Command(name='test', callback=test, description='test command'))

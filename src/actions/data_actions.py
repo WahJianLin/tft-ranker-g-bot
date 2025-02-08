@@ -1,21 +1,35 @@
 from datetime import date, datetime
 
-from src.actions.database import insert_unprocessed_players
+from src.actions.database import insert_player, get_players, insert_competitors
+from src.actions.riot_api import get_ranks, get_summoner_id_call, get_player_data_call
 from src.resources.constants import ServerLocationEnum, REGION_MAP, SERVER_NAME_MAP, TFT_RANK_VALUE, LEADER_BOARD_TITLE, \
     DISPLAY_NAME, TFT_RANK_TITLE
-from src.resources.entity import Player
+from src.resources.entity import Player, PlayerDataRes
 
 leaderboard = []
-total_api_calls = 0
 
 
-def register_tft_race(summoner_name: str, location: ServerLocationEnum) -> None:
+# Registering into waitlist
+def register_player(summoner_name: str, location: ServerLocationEnum) -> None:
     display_name: str = summoner_name.split("#")[0]
     player: Player = Player(None, summoner_name, display_name, REGION_MAP[location], SERVER_NAME_MAP[location],
                             date.today(), False, None)
-    insert_unprocessed_players(player)
+    insert_player(player)
 
 
+# processing waitlist
+def process_waitlist() -> None:
+    players_tpl: list[tuple[Player, ...]] = get_players()
+    for player_tpl in players_tpl:
+        player: Player = Player.from_tuple(player_tpl)
+
+        player_data_res: PlayerDataRes = get_player_data_call(player.summoner_name, player.region)
+        summoner_id: str|None = get_summoner_id_call(player_data_res.puuid, player.riot_server)
+        if summoner_id is not None:
+            insert_competitors(player, summoner_id)
+
+
+# generating leaderboard
 def sort_leaderboard() -> None:
     leaderboard.sort(key=lambda x: x[TFT_RANK_VALUE], reverse=True)
 
@@ -51,6 +65,6 @@ def generate_leaderboard_display() -> str:
 
 
 def get_leaderboard_result() -> str:
-    get_ranks()
+    get_ranks(leaderboard)
     sort_leaderboard()
     return generate_leaderboard_display()
