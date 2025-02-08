@@ -35,7 +35,7 @@ def get_unprocessed_player_by_summoner_name(summoner_name: str) -> tuple[Any, ..
     conn = db_base_connect()
     db_cursor = conn.cursor()
 
-    db_cursor.execute("SELECT * FROM players WHERE summoner_name = %s",summoner_name)
+    db_cursor.execute("SELECT * FROM players WHERE summoner_name = %s", [summoner_name])
     record = db_cursor.fetchone()
 
     db_cursor.close()

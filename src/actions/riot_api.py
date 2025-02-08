@@ -8,6 +8,7 @@ from enum import Enum
 from typing import Final
 from datetime import datetime, date
 
+from src.actions.database import insert_unprocessed_players
 from src.resources.entity import Player, PlayerDataRes
 
 load_dotenv()
@@ -231,4 +232,4 @@ def register_tft_race(summoner_name: str, location: SERVER_LOCATION) -> None:
 
     display_name: str = summoner_name.split("#")[0]
     player: Player = Player(None, summoner_name, display_name, region_map[location], server_name_map[location], date.today(), False, None)
-    print(player)
+    insert_unprocessed_players(player)
