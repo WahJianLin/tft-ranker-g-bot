@@ -5,9 +5,10 @@ import traceback
 import discord
 from discord.ext import commands
 
+from src.actions.data_actions import register_tft_race, get_leaderboard_result
 from src.actions.database import get_unprocessed_player_by_summoner_name
 from src.actions.permission import is_mod
-from src.actions.riot_api import get_leaderboard_result, register_tft_race, SERVER_LOCATION, \
+from src.actions.riot_api import ServerLocationEnum, \
     get_player_data_call
 
 ONLY_MODS: str = "Only Mods can use this command"
@@ -27,7 +28,7 @@ async def get_leaderboard(interaction: discord.Interaction):
         await interaction.response.send_message(ONLY_MODS, ephemeral=True)
 
 
-async def join_ranked_race(interaction: discord.Interaction, summoner_name: str, location: SERVER_LOCATION):
+async def join_ranked_race(interaction: discord.Interaction, summoner_name: str, location: ServerLocationEnum):
     try:
         if not re.search(VALID_SUMMONER_NAME_REGEX, summoner_name):
             await interaction.response.send_message(
@@ -52,9 +53,18 @@ async def join_ranked_race(interaction: discord.Interaction, summoner_name: str,
                                                 ephemeral=True)
 
 
+async def process_registered_players(interaction: discord.Interaction):
+    await interaction.response.send_message("hello ajumma world")
+    if is_mod(interaction.user.roles):
+        await interaction.response.send_message("hello ajumma world")
+    else:
+        await interaction.response.send_message(ONLY_MODS, ephemeral=True)
+
 def setup(client: commands.Bot):
     client.tree.add_command(discord.app_commands.Command(name='test', callback=test, description='test command'))
     client.tree.add_command(discord.app_commands.Command(name='leaderboard', callback=get_leaderboard,
                                                          description='generate current leaderboard'))
     client.tree.add_command(discord.app_commands.Command(name='join_ranked_race', callback=join_ranked_race,
                                                          description='Joins Ranked TFT race. Requires Summoner name and region. EX: Player#NA1 NA'))
+    client.tree.add_command(discord.app_commands.Command(name='process_players_wait_list', callback=process_registered_players,
+                                                         description='Mod can allow players to join race'))
