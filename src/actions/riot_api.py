@@ -1,17 +1,17 @@
 import json
 import os
-import requests
-from discord import app_commands
-
-from dotenv import load_dotenv
+from datetime import datetime, date
 from enum import Enum
 from typing import Final
-from datetime import datetime, date
+
+import requests
+from dotenv import load_dotenv
 
 from src.actions.database import insert_unprocessed_players
 from src.resources.entity import Player, PlayerDataRes
 
 load_dotenv()
+
 
 class RIOT_TIERS(Enum):
     IRON = 100000000
@@ -49,6 +49,7 @@ class SERVER_LOCATION(Enum):
     TR = 'tr'
     TW = 'tw'
     VN = 'vn'
+
 
 region_map = {
     SERVER_LOCATION.BR: 'americas',
@@ -99,7 +100,7 @@ TIER = 'tier'
 RANK = 'rank'
 LEAGUE_POINTS = 'leaguePoints'
 TFT_RANK_VALUE = 'tft_rank_value'
-TFT_RANK_TITLE ='tft_rank_title'
+TFT_RANK_TITLE = 'tft_rank_title'
 QUEUE_TYPE = 'queueType'
 SUMMONER_NAME = 'summoner_name'
 DISPLAY_NAME = 'display_name'
@@ -112,8 +113,8 @@ GET_RANK_DATA_URL = 'https://{}.api.riotgames.com/tft/league/v1/entries/by-summo
 
 total_api_calls = 0
 
-
 leaderboard = []
+
 
 def get_player_data_call(summoner_name: str, location: SERVER_LOCATION) -> PlayerDataRes or None:
     split_name = summoner_name.split('#')
@@ -136,12 +137,14 @@ def get_player_data_call(summoner_name: str, location: SERVER_LOCATION) -> Playe
         print('Error exception in get_player_data_call:', e)
         return None
 
+
 def get_ranks() -> None:
     print(RIOT_API_KEY)
     with open('resources\\processedPlayers.json', 'r') as file:
         data = json.load(file)
     for p in data:
         get_rank_data(p[SUMMONER_NAME_JSON_VAL], p[SUMMONER_ID_JSON_VAL], p[SERVER_JSON_VAL], p[DISPLAY_NAME_JSON_VAL])
+
 
 def get_rank_data(summoner_name: str, summoner_id: int, server: str, display_name: str) -> None:
     # Define the API endpoint URL
@@ -199,7 +202,7 @@ def generate_leaderboard_display() -> str:
     leaderboard_str += '-' * 30 + '\n'
     rank_pos = 0
     last_rank_val = -1
-    print("-"*30)
+    print("-" * 30)
     print(len(leaderboard))
     print(leaderboard)
     final_leaderboard = []
@@ -229,7 +232,7 @@ def get_leaderboard_result() -> str:
 
 
 def register_tft_race(summoner_name: str, location: SERVER_LOCATION) -> None:
-
     display_name: str = summoner_name.split("#")[0]
-    player: Player = Player(None, summoner_name, display_name, region_map[location], server_name_map[location], date.today(), False, None)
+    player: Player = Player(None, summoner_name, display_name, region_map[location], server_name_map[location],
+                            date.today(), False, None)
     insert_unprocessed_players(player)

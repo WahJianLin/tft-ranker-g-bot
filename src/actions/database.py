@@ -1,9 +1,9 @@
 import os
-from typing import Any
+from datetime import datetime
 
 import psycopg2
 from dotenv import load_dotenv
-from psycopg2._psycopg import cursor, connection
+from psycopg2._psycopg import connection, cursor
 
 from src.resources.entity import Player
 
@@ -21,22 +21,25 @@ def db_base_connect() -> connection:
 
 
 def get_unprocessed_players() -> list[tuple[Player, ...]]:
-    conn = db_base_connect()
-    db_cursor = conn.cursor()
+    conn: connection = db_base_connect()
+    db_cursor: cursor = conn.cursor()
 
-    db_cursor.execute("SELECT * FROM players")
-    records = db_cursor.fetchall()
+    query: str = "SELECT * FROM players"
+    db_cursor.execute(query)
+    records: list[tuple[Player, ...]] = db_cursor.fetchall()
 
     db_cursor.close()
     conn.close()
     return records
 
-def get_unprocessed_player_by_summoner_name(summoner_name: str) -> tuple[Any, ...] | None:
-    conn = db_base_connect()
-    db_cursor = conn.cursor()
 
-    db_cursor.execute("SELECT * FROM players WHERE summoner_name = %s", [summoner_name])
-    record = db_cursor.fetchone()
+def get_unprocessed_player_by_summoner_name(summoner_name: str) -> tuple[Player, ...] | None:
+    conn: connection = db_base_connect()
+    db_cursor: cursor = conn.cursor()
+
+    query: str = "SELECT * FROM players WHERE summoner_name = %s"
+    db_cursor.execute(query, [summoner_name])
+    record: tuple[Player, ...] = db_cursor.fetchone()
 
     db_cursor.close()
     conn.close()
@@ -45,16 +48,17 @@ def get_unprocessed_player_by_summoner_name(summoner_name: str) -> tuple[Any, ..
 
 def insert_unprocessed_players(player: Player) -> None:
     if get_unprocessed_player_by_summoner_name(player.summoner_name) is None:
-        conn = db_base_connect()
-        db_cursor = conn.cursor()
-        values = (
-            player.summoner_name, player.display_name, player.region, player.server, player.join_date, player.is_processed,
+        conn: connection = db_base_connect()
+        db_cursor: cursor = conn.cursor()
+        values: tuple[str, str, str, str, datetime, bool, datetime] = (
+            player.summoner_name, player.display_name, player.region, player.server, player.join_date,
+            player.is_processed,
             player.processed_date
         )
         db_cursor.execute(
-        "INSERT INTO public.players(summoner_name, display_name, region, server, join_date, "
-              "is_processed, processed_date) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-              values
+            "INSERT INTO public.players(summoner_name, display_name, region, server, join_date, "
+            "is_processed, processed_date) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            values
         )
         conn.commit()
         print("Success: Player Registered")

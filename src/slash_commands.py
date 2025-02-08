@@ -6,12 +6,12 @@ import discord
 from discord.ext import commands
 
 from src.actions.database import get_unprocessed_player_by_summoner_name
+from src.actions.permission import is_mod
 from src.actions.riot_api import get_leaderboard_result, register_tft_race, SERVER_LOCATION, \
     get_player_data_call
-from src.actions.permission import is_mod
 
-ONLY_MODS = "Only Mods can use this command"
-VALID_SUMMONER_NAME_REGEX = "\\w#\\w"
+ONLY_MODS: str = "Only Mods can use this command"
+VALID_SUMMONER_NAME_REGEX: str = "\\w#\\w"
 
 
 async def test(interaction: discord.Interaction):
