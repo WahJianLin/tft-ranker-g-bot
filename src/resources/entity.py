@@ -1,6 +1,7 @@
 import datetime
 from dataclasses import dataclass
 
+
 @dataclass
 class Player:
     id: int
@@ -34,6 +35,20 @@ class Competitor:
     display_name: str
     riot_server: str
     is_competing: bool
+    player_fkey: int
+
+    @classmethod
+    def from_tuple(cls, data: tuple):
+        return cls(
+            id=data[0],
+            summoner_name=data[1],
+            summoner_id=data[2],
+            display_name=data[3],
+            riot_server=data[4],
+            is_competing=data[5],
+            player_fkey=data[6]
+        )
+
 
 @dataclass
 class PlayerDataRes:
