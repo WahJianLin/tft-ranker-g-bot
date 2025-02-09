@@ -3,8 +3,7 @@ from datetime import date, datetime
 from src.actions.database import insert_player, get_players, insert_competitors, \
     get_competitor_by_summoner_name, get_competitors_by_summoner_names, update_player_processed
 from src.actions.riot_api import get_ranks, get_summoner_id_call, get_player_data_call
-from src.resources.constants import ServerLocationEnum, REGION_MAP, SERVER_NAME_MAP, TFT_RANK_VALUE, LEADER_BOARD_TITLE, \
-    DISPLAY_NAME, TFT_RANK_TITLE
+from src.resources.constants import ServerLocationEnum, REGION_MAP, SERVER_NAME_MAP, LEADER_BOARD_TITLE
 from src.resources.entity import Player, PlayerDataRes, Competitor, LeaderboardEntry
 
 
@@ -36,7 +35,7 @@ def process_waitlist() -> None:
         else:
             print("Failed: Competitor already registered")
 
-    #processes the players into competitors and updates relevant tables
+    # processes the players into competitors and updates relevant tables
     if summoner_data_tpl:
         insert_competitors(summoner_data_tpl)
 
@@ -69,19 +68,16 @@ def generate_leaderboard_display(leaderboard_entries: list[LeaderboardEntry]) ->
 
     for val in leaderboard_entries:
 
-        # Check if the value is not already in 'res'
+        # clears out any potential duplicates
         if val not in final_leaderboard:
-            # If not present, append it to 'res'
             final_leaderboard.append(val)
 
-    print(final_leaderboard)
     for entry in final_leaderboard:
         if last_rank_val != entry.tft_rank_value:
             rank_pos += 1
         entry_detail = f'{rank_pos}) {entry.display_name}    {entry.tft_rank_title}\n'
         leaderboard_str += entry_detail
     leaderboard_str += '-' * 30
-    print(leaderboard_str)
     return leaderboard_str
 
 

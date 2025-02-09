@@ -64,6 +64,7 @@ class PlayerDataRes:
             tag_line=data.get("tagLine", "")
         )
 
+
 @dataclass
 class LeaderboardEntry:
     summoner_name: str

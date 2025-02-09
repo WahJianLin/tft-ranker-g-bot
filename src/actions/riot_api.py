@@ -1,14 +1,13 @@
-import json
 import os
 from typing import Final
 
 import requests
 from dotenv import load_dotenv
 
+from src.actions.database import get_valid_competitor
 from src.resources.constants import QUEUE_TYPE, RANKED_QUEUE_TYPE, TIER, RANK, \
-    LEAGUE_POINTS, RiotTiersEnum, RiotRanksEnum, SUMMONER_NAME, TFT_RANK_VALUE, TFT_RANK_TITLE, DISPLAY_NAME, \
-    SUMMONER_NAME_JSON_VAL, SUMMONER_ID_JSON_VAL, SERVER_JSON_VAL, DISPLAY_NAME_JSON_VAL
-from src.resources.entity import PlayerDataRes, LeaderboardEntry
+    LEAGUE_POINTS, RiotTiersEnum, RiotRanksEnum
+from src.resources.entity import PlayerDataRes, LeaderboardEntry, Competitor
 
 load_dotenv()
 
@@ -19,8 +18,6 @@ GET_ACCOUNT_DATA_URL = 'https://{}.api.riotgames.com/riot/account/v1/accounts/by
 GET_RANK_DATA_URL = 'https://{}.api.riotgames.com/tft/league/v1/entries/by-summoner/{}?api_key={}'
 
 GET_SUMMONER_DATA_URL = 'https://{}.api.riotgames.com/tft/summoner/v1/summoners/by-puuid/{}?api_key={}'
-
-total_api_calls: int = 0
 
 
 def get_player_data_call(summoner_name: str, region: str) -> PlayerDataRes or None:
@@ -62,11 +59,8 @@ def get_summoner_id_call(puuid: str, server: str) -> str | None:
         return None
 
 
-def get_rank_data(summoner_name: str, summoner_id: int, server: str, display_name: str
-                  ) -> LeaderboardEntry | None:
-    url = GET_RANK_DATA_URL.format(server, summoner_id, RIOT_API_KEY)
-    global total_api_calls
-    total_api_calls += 1
+def get_rank_data(competitor: Competitor) -> LeaderboardEntry | None:
+    url = GET_RANK_DATA_URL.format(competitor.riot_server, competitor.summoner_id, RIOT_API_KEY)
     try:
         response = requests.get(url)
 
@@ -86,9 +80,9 @@ def get_rank_data(summoner_name: str, summoner_id: int, server: str, display_nam
 
                 tft_rank_title = f'{tier} {rank} {points} LP'
                 tft_rank_value = RiotTiersEnum[tier].value + RiotRanksEnum[rank].value + points
-                entry = {SUMMONER_NAME: summoner_name, TFT_RANK_TITLE: tft_rank_title,
-                         TFT_RANK_VALUE: tft_rank_value, DISPLAY_NAME: display_name}
-                return LeaderboardEntry(summoner_name, tft_rank_title, tft_rank_value, display_name)
+
+                return LeaderboardEntry(competitor.summoner_name, tft_rank_title, tft_rank_value,
+                                        competitor.display_name)
 
             return None
         else:
@@ -103,12 +97,12 @@ def get_rank_data(summoner_name: str, summoner_id: int, server: str, display_nam
 
 def get_ranks() -> list[LeaderboardEntry]:
     leaderboard_entries: list[LeaderboardEntry] = []
-    with open('resources\\processedPlayers.json', 'r') as file:
-        data = json.load(file)
-    for p in data:
-        leaderboard_entry: LeaderboardEntry = get_rank_data(p[SUMMONER_NAME_JSON_VAL], p[SUMMONER_ID_JSON_VAL],
-                                                            p[SERVER_JSON_VAL], p[DISPLAY_NAME_JSON_VAL]
-                                                            )
+    valid_competitors: list[tuple[Competitor, ...]] = get_valid_competitor()
+
+    for entry in valid_competitors:
+        competitor: Competitor = Competitor.from_tuple(entry)
+        leaderboard_entry: LeaderboardEntry = get_rank_data(competitor)
         if leaderboard_entry:
             leaderboard_entries.append(leaderboard_entry)
+
     return leaderboard_entries
