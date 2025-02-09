@@ -8,9 +8,8 @@ from discord.ext import commands
 from src.actions.data_actions import register_player, get_leaderboard_result, process_waitlist
 from src.actions.database import get_player_by_summoner_name
 from src.actions.permission import is_mod
-from src.actions.riot_api import ServerLocationEnum, \
-    get_player_data_call
-from src.resources.constants import REGION_MAP
+from src.actions.riot_api import get_player_data_call
+from src.resources.constants import REGION_MAP, ServerLocationEnum
 
 ONLY_MODS: str = "Only Mods can use this command"
 VALID_SUMMONER_NAME_REGEX: str = "\\w#\\w"
@@ -23,7 +22,7 @@ async def test(interaction: discord.Interaction):
 async def get_leaderboard(interaction: discord.Interaction):
     if is_mod(interaction.user.roles):
         await interaction.response.defer()
-        await asyncio.sleep(30)
+        await asyncio.sleep(10)
         await interaction.followup.send(get_leaderboard_result())
     else:
         await interaction.response.send_message(ONLY_MODS, ephemeral=True)

@@ -63,3 +63,10 @@ class PlayerDataRes:
             game_name=data.get("gameName", ""),
             tag_line=data.get("tagLine", "")
         )
+
+@dataclass
+class LeaderboardEntry:
+    summoner_name: str
+    tft_rank_title: str
+    tft_rank_value: int
+    display_name: str

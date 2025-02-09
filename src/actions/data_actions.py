@@ -5,9 +5,7 @@ from src.actions.database import insert_player, get_players, insert_competitors,
 from src.actions.riot_api import get_ranks, get_summoner_id_call, get_player_data_call
 from src.resources.constants import ServerLocationEnum, REGION_MAP, SERVER_NAME_MAP, TFT_RANK_VALUE, LEADER_BOARD_TITLE, \
     DISPLAY_NAME, TFT_RANK_TITLE
-from src.resources.entity import Player, PlayerDataRes, Competitor
-
-leaderboard = []
+from src.resources.entity import Player, PlayerDataRes, Competitor, LeaderboardEntry
 
 
 # Registering into waitlist
@@ -56,23 +54,20 @@ def process_waitlist() -> None:
 
 
 # generating leaderboard
-def sort_leaderboard() -> None:
-    leaderboard.sort(key=lambda x: x[TFT_RANK_VALUE], reverse=True)
+def sort_leaderboard(leaderboard_entries: list[LeaderboardEntry]) -> None:
+    leaderboard_entries.sort(key=lambda entry: entry.tft_rank_value, reverse=True)
 
 
-def generate_leaderboard_display() -> str:
+def generate_leaderboard_display(leaderboard_entries: list[LeaderboardEntry]) -> str:
     now = datetime.now()
     dt_string = now.strftime('%B %d, %Y %I:%M:%S %p')
     leaderboard_str = LEADER_BOARD_TITLE + dt_string + '\n'
     leaderboard_str += '-' * 30 + '\n'
     rank_pos = 0
     last_rank_val = -1
-    print("-" * 30)
-    print(len(leaderboard))
-    print(leaderboard)
-    final_leaderboard = []
+    final_leaderboard: list[LeaderboardEntry] = []
 
-    for val in leaderboard:
+    for val in leaderboard_entries:
 
         # Check if the value is not already in 'res'
         if val not in final_leaderboard:
@@ -81,9 +76,9 @@ def generate_leaderboard_display() -> str:
 
     print(final_leaderboard)
     for entry in final_leaderboard:
-        if last_rank_val != entry[TFT_RANK_VALUE]:
+        if last_rank_val != entry.tft_rank_value:
             rank_pos += 1
-        entry_detail = f'{rank_pos}) {entry[DISPLAY_NAME]}    {entry[TFT_RANK_TITLE]}\n'
+        entry_detail = f'{rank_pos}) {entry.display_name}    {entry.tft_rank_title}\n'
         leaderboard_str += entry_detail
     leaderboard_str += '-' * 30
     print(leaderboard_str)
@@ -91,6 +86,6 @@ def generate_leaderboard_display() -> str:
 
 
 def get_leaderboard_result() -> str:
-    get_ranks(leaderboard)
-    sort_leaderboard()
-    return generate_leaderboard_display()
+    leaderboard_entries: list[LeaderboardEntry] = get_ranks()
+    sort_leaderboard(leaderboard_entries)
+    return generate_leaderboard_display(leaderboard_entries)
