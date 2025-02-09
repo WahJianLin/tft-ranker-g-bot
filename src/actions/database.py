@@ -79,7 +79,7 @@ def get_competitor_by_summoner_name(summoner_name: str) -> tuple[Player, ...] | 
     conn.close()
     return record
 
-def insert_competitors(player: Player, summoner_id: str) -> None:
+def insert_competitor(player: Player, summoner_id: str) -> None:
     if get_competitor_by_summoner_name(player.summoner_name) is None:
         conn: connection = db_base_connect()
         db_cursor: cursor = conn.cursor()
@@ -96,3 +96,16 @@ def insert_competitors(player: Player, summoner_id: str) -> None:
         conn.close()
     else:
         print("Failed: Competitor already registered")
+
+def insert_competitors(competitors_list:list[tuple[str, str, str, str, bool]]) -> None:
+    conn: connection = db_base_connect()
+    db_cursor: cursor = conn.cursor()
+    query: str =  "INSERT INTO public.competitors(summoner_name, summoner_id, display_name, riot_server, is_competing)	VALUES "
+    args_str = ','.join(db_cursor.mogrify("(%s, %s, %s, %s, %s)", competitor).decode('utf-8') for competitor in competitors_list)
+    print(query + args_str)
+    db_cursor.execute(query + args_str)
+
+    conn.commit()
+    print("Success: Competitor is processed and registered")
+    db_cursor.close()
+    conn.close()

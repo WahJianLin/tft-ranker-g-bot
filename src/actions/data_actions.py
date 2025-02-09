@@ -1,6 +1,7 @@
 from datetime import date, datetime
 
-from src.actions.database import insert_player, get_players, insert_competitors
+from src.actions.database import insert_player, get_players, insert_competitor, insert_competitors, \
+    get_competitor_by_summoner_name
 from src.actions.riot_api import get_ranks, get_summoner_id_call, get_player_data_call
 from src.resources.constants import ServerLocationEnum, REGION_MAP, SERVER_NAME_MAP, TFT_RANK_VALUE, LEADER_BOARD_TITLE, \
     DISPLAY_NAME, TFT_RANK_TITLE
@@ -20,13 +21,25 @@ def register_player(summoner_name: str, location: ServerLocationEnum) -> None:
 # processing waitlist
 def process_waitlist() -> None:
     players_tpl: list[tuple[Player, ...]] = get_players()
+    summoner_data_tpl: list[tuple[str, str, str, str, bool]] = []
     for player_tpl in players_tpl:
         player: Player = Player.from_tuple(player_tpl)
 
         player_data_res: PlayerDataRes = get_player_data_call(player.summoner_name, player.region)
-        summoner_id: str|None = get_summoner_id_call(player_data_res.puuid, player.riot_server)
-        if summoner_id is not None:
-            insert_competitors(player, summoner_id)
+        summoner_id: str | None = get_summoner_id_call(player_data_res.puuid, player.riot_server)
+
+        if get_competitor_by_summoner_name(player.summoner_name) is None:
+            summoner_data_tpl.append((player.summoner_name, summoner_id, player.display_name, player.riot_server, True))
+        else:
+            print("Failed: Competitor already registered")
+        # if summoner_id is not None:
+        #     insert_competitor(player, summoner_id)
+
+    print(summoner_data_tpl)
+    if summoner_data_tpl:
+        insert_competitors(summoner_data_tpl)
+    else:
+        print('Failed: No Competitor to add')
 
 
 # generating leaderboard
