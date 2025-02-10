@@ -68,6 +68,19 @@ def insert_player(player: Player) -> None:
         print("Failed: Player already registered")
 
 
+def get_valid_competitor() -> list[tuple[Competitor, ...]] | None:
+    conn: connection = db_base_connect()
+    db_cursor: cursor = conn.cursor()
+
+    query: str = "SELECT * FROM competitors WHERE is_competing = true"
+    db_cursor.execute(query)
+    record: list[tuple[Competitor, ...]] = db_cursor.fetchall()
+
+    db_cursor.close()
+    conn.close()
+    return record
+
+
 def get_competitor_by_summoner_name(summoner_name: str) -> tuple[Player, ...] | None:
     conn: connection = db_base_connect()
     db_cursor: cursor = conn.cursor()
