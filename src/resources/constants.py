@@ -75,20 +75,29 @@ SERVER_NAME_MAP = {
     ServerLocationEnum.VN: 'vn2',
 }
 
-RANKED_QUEUE_TYPE = 'RANKED_TFT'
+RANKED_QUEUE_TYPE: str = 'RANKED_TFT'
 
 # CONSTANTS names
-SUMMONER_ID_JSON_VAL = 'summonerId'
-SUMMONER_NAME_JSON_VAL = 'summonerName'
-SERVER_JSON_VAL = 'server'
-DISPLAY_NAME_JSON_VAL = 'displayName'
-TIER = 'tier'
-RANK = 'rank'
-LEAGUE_POINTS = 'leaguePoints'
-TFT_RANK_VALUE = 'tft_rank_value'
-TFT_RANK_TITLE = 'tft_rank_title'
-QUEUE_TYPE = 'queueType'
-SUMMONER_NAME = 'summoner_name'
-DISPLAY_NAME = 'display_name'
+SUMMONER_ID_JSON_VAL: str = 'summonerId'
+SUMMONER_NAME_JSON_VAL: str = 'summonerName'
+SERVER_JSON_VAL: str = 'server'
+DISPLAY_NAME_JSON_VAL: str = 'displayName'
+TIER: str = 'tier'
+RANK: str = 'rank'
+LEAGUE_POINTS: str = 'leaguePoints'
+TFT_RANK_VALUE: str = 'tft_rank_value'
+TFT_RANK_TITLE: str = 'tft_rank_title'
+QUEUE_TYPE: str = 'queueType'
+SUMMONER_NAME: str = 'summoner_name'
+DISPLAY_NAME: str = 'display_name'
 
-LEADER_BOARD_TITLE = 'Leaderboard rank: '
+LEADER_BOARD_TITLE: str = 'Leaderboard rank: '
+
+class SlashCommands(Enum):
+    TEST = 'test'
+    LEADERBOARD = 'leaderboard'
+    JOIN_RANKED_RACE = 'join_ranked_race'
+    PROCESS_PLAYERS = 'process_players_wait_list'
+
+ONLY_MODS: str = "Only Mods can use this command"
+VALID_SUMMONER_NAME_REGEX: str = "\\w#\\w"

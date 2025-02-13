@@ -1,8 +1,10 @@
+import logging
 import os
 from typing import Final
 
 import requests
 from dotenv import load_dotenv
+from requests import Response
 
 from src.actions.database import get_valid_competitor
 from src.resources.constants import QUEUE_TYPE, RANKED_QUEUE_TYPE, TIER, RANK, \
@@ -21,16 +23,16 @@ GET_SUMMONER_DATA_URL = 'https://{}.api.riotgames.com/tft/summoner/v1/summoners/
 
 
 def get_player_data_call(summoner_name: str, region: str) -> PlayerDataRes or None:
-    split_name = summoner_name.split('#')
-    game_name = split_name[0]
-    tag_line = split_name[1]
-    url = GET_ACCOUNT_DATA_URL.format(region, game_name, tag_line, RIOT_API_KEY)
+    split_name: list[str] = summoner_name.split('#')
+    game_name: str = split_name[0]
+    tag_line: str = split_name[1]
+    url: str = GET_ACCOUNT_DATA_URL.format(region, game_name, tag_line, RIOT_API_KEY)
     print("calling get_player_data_call on", summoner_name, region)
     try:
-        response = requests.get(url)
+        response: Response = requests.get(url)
 
         if response.status_code == 200:
-            body = response.json()
+            body: dict = response.json()
             return PlayerDataRes.from_res(body)
         else:
             print('Error api get_player_data_call:', response.status_code, 'Player', game_name, response.content, url)
@@ -44,10 +46,10 @@ def get_player_data_call(summoner_name: str, region: str) -> PlayerDataRes or No
 def get_summoner_id_call(puuid: str, server: str) -> str | None:
     url = GET_SUMMONER_DATA_URL.format(server, puuid, RIOT_API_KEY)
     try:
-        response = requests.get(url)
+        response: Response = requests.get(url)
 
         if response.status_code == 200:
-            body = response.json()
+            body: dict = response.json()
             return body['id']
         else:
             print('Error not correct code in get_summoner_id_call:', response.status_code, url)
@@ -58,19 +60,18 @@ def get_summoner_id_call(puuid: str, server: str) -> str | None:
         print('Error exception in get_summoner_id_call:', e)
         return None
 
-
 def get_rank_data(competitor: Competitor) -> LeaderboardEntry | None:
     url = GET_RANK_DATA_URL.format(competitor.riot_server, competitor.summoner_id, RIOT_API_KEY)
     try:
-        response = requests.get(url)
-
+        response: Response = requests.get(url)
+        print('url', url)
         if response.status_code == 200:
-            body = response.json()
-            body_len = len(body)
+            body: dict = response.json()
+            body_len: int = len(body)
             if body_len > 0:
-                rank_data = None
+                rank_data: dict = {}
                 # checks to see if players have played normal tft ranked
-                while rank_data is None and body_len > 0:
+                while not rank_data and body_len > 0:
                     if body[body_len - 1][QUEUE_TYPE] == RANKED_QUEUE_TYPE:
                         rank_data = body[body_len - 1]
                     body_len -= 1
@@ -78,14 +79,15 @@ def get_rank_data(competitor: Competitor) -> LeaderboardEntry | None:
                 rank: str = rank_data[RANK]  # gets rank subdivision
                 points: int = rank_data[LEAGUE_POINTS]  # gets lp value
 
-                tft_rank_title = f'{tier} {rank} {points} LP'
-                tft_rank_value = RiotTiersEnum[tier].value + RiotRanksEnum[rank].value + points
+                tft_rank_title: str = f'{tier} {rank} {points} LP'
+                tft_rank_value: int = RiotTiersEnum[tier].value + RiotRanksEnum[rank].value + points
 
                 return LeaderboardEntry(competitor.summoner_name, tft_rank_title, tft_rank_value,
                                         competitor.display_name)
 
             return None
         else:
+            # logging.error()
             print('Error get_rank_data:', response.status_code)
             return None
     except requests.exceptions.RequestException as e:
