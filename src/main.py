@@ -1,31 +1,21 @@
-from typing import Final
+import logging
 import os
+from typing import Final
 
-from dotenv import load_dotenv
-from discord import Intents, Message
+from discord import Intents
 from discord.ext import commands
-from responses import get_response
+from dotenv import load_dotenv
+
 from src import slash_commands
 
 load_dotenv()
 DISCORD_TOKEN: Final[str] = os.getenv('DISCORD_TOKEN')
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 intents: Intents = Intents.default()
 intents.message_content = True  # NOQA
 client = commands.Bot(command_prefix="!", intents=intents)
-
-
-# methods
-async def send_message(message: Message, user_message: str) -> None:
-    if not user_message:
-        print('failed message')
-        return
-
-    try:
-        response: str = get_response(user_message)
-        await  message.channel.send(response)
-    except Exception as e:
-        print(e)
 
 
 # starting bot
@@ -42,6 +32,7 @@ async def on_ready() -> None:
 
 # main
 slash_commands.setup(client)
+
 
 def main() -> None:
     client.run(token=DISCORD_TOKEN)
