@@ -64,7 +64,6 @@ def get_rank_data(competitor: Competitor) -> LeaderboardEntry | None:
     url = GET_RANK_DATA_URL.format(competitor.riot_server, competitor.summoner_id, RIOT_API_KEY)
     try:
         response: Response = requests.get(url)
-        print('url', url)
         if response.status_code == 200:
             body: dict = response.json()
             body_len: int = len(body)
