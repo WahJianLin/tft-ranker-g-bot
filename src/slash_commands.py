@@ -9,7 +9,7 @@ from src.actions.data_actions import register_player, get_leaderboard_result, pr
 from src.actions.database import get_player_by_summoner_name
 from src.actions.permission import is_mod
 from src.actions.riot_api import get_player_data_call
-from src.resources.constants import REGION_MAP, SlashCommands, ONLY_MODS, VALID_SUMMONER_NAME_REGEX
+from src.resources.constants import REGION_MAP, SlashCommands, ONLY_MODS, VALID_SUMMONER_NAME_REGEX, ServerLocationEnum
 from src.resources.logging_constants import SLASH_COMMANDS, COMMAND_SUCCESS, COMMAND_FAIL, COMMAND_ERROR_UNEXPECTED, \
     COMMAND_ERROR_SUMMONER_NAME, COMMAND_ERROR_EXISTING_SUMMONER, COMMAND_SUCCESS_SUMMONER_REGISTERED, \
     COMMAND_ERROR_SUMMONER_NOT_FOUND, COMMAND_SUCCESS_PROCESS
@@ -37,7 +37,7 @@ async def get_leaderboard(interaction: discord.Interaction):
                                                 ephemeral=True)
 
 
-async def join_ranked_race(interaction: discord.Interaction, summoner_name: str, location: SlashCommands):
+async def join_ranked_race(interaction: discord.Interaction, summoner_name: str, location: ServerLocationEnum):
     try:
         logging.info(SLASH_COMMANDS.format(SlashCommands.JOIN_RANKED_RACE.value))
         if not re.search(VALID_SUMMONER_NAME_REGEX, summoner_name):

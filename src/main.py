@@ -1,12 +1,14 @@
+import asyncio
 import logging
 import os
 from typing import Final
 
 from discord import Intents
-from discord.ext import commands
+from discord.ext import commands, tasks
 from dotenv import load_dotenv
 
 from src import slash_commands
+from src.actions.scheduled_actions import schedule_leaderboard_caller
 
 load_dotenv()
 DISCORD_TOKEN: Final[str] = os.getenv('DISCORD_TOKEN')
@@ -19,6 +21,11 @@ client = commands.Bot(command_prefix="!", intents=intents)
 
 
 # starting bot
+
+@schedule_leaderboard_caller.before_loop
+async def before():
+    await client.wait_until_ready()
+    print("Finished waiting")
 
 @client.event
 async def on_ready() -> None:
@@ -33,10 +40,13 @@ async def on_ready() -> None:
 # main
 slash_commands.setup(client)
 
+def main():
+    asyncio.run(start_bot())
 
-def main() -> None:
-    client.run(token=DISCORD_TOKEN)
-
+async def start_bot():
+    async with client:
+        schedule_leaderboard_caller.start(client)
+        await client.start(DISCORD_TOKEN)
 
 if __name__ == '__main__':
     main()
