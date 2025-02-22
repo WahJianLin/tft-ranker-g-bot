@@ -50,14 +50,19 @@ def insert_player(player: Player) -> None:
     if get_player_by_summoner_name(player.summoner_name) is None:
         conn: connection = db_base_connect()
         db_cursor: cursor = conn.cursor()
-        values: tuple[str, str, str, str, datetime, bool, datetime] = (
-            player.summoner_name, player.display_name, player.region, player.riot_server, player.join_date,
+        values: tuple[str, str, str, str, datetime, bool, datetime, bool] = (
+            player.summoner_name,
+            player.display_name,
+            player.region,
+            player.riot_server,
+            player.join_date,
             player.is_processed,
-            player.processed_date
+            player.processed_date,
+            player.is_streamer
         )
         db_cursor.execute(
             "INSERT INTO public.players(summoner_name, display_name, region, riot_server, join_date, "
-            "is_processed, processed_date) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            "is_processed, processed_date, is_streamer) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
             values
         )
         conn.commit()
