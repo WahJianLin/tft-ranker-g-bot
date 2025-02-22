@@ -12,6 +12,7 @@ class Player:
     join_date: datetime
     is_processed: bool
     processed_date: datetime
+    is_streamer: bool
 
     @classmethod
     def from_tuple(cls, data: tuple):
@@ -23,7 +24,8 @@ class Player:
             riot_server=data[4],
             join_date=data[5],
             is_processed=bool(data[6]),
-            processed_date=data[7]
+            processed_date=data[7],
+            is_streamer=data[8]
         )
 
 
