@@ -37,7 +37,8 @@ async def get_leaderboard(interaction: discord.Interaction):
                                                 ephemeral=True)
 
 
-async def join_ranked_race(interaction: discord.Interaction, summoner_name: str, location: ServerLocationEnum):
+async def join_ranked_race(interaction: discord.Interaction, summoner_name: str, location: ServerLocationEnum,
+                           display_name: str | None, is_streamer: bool = False):
     try:
         logging.info(SLASH_COMMANDS.format(SlashCommands.JOIN_RANKED_RACE.value))
         if not re.search(VALID_SUMMONER_NAME_REGEX, summoner_name):
@@ -48,9 +49,10 @@ async def join_ranked_race(interaction: discord.Interaction, summoner_name: str,
             await interaction.response.send_message(
                 COMMAND_ERROR_EXISTING_SUMMONER.format(summoner_name),
                 ephemeral=True)
+        # To Do filter out malicious display names
         elif get_player_data_call(summoner_name, REGION_MAP[location]):
             # registers player
-            register_player(summoner_name, location)
+            register_player(summoner_name, location, display_name, is_streamer)
             logging.info(SLASH_COMMANDS.format(COMMAND_SUCCESS))
             await interaction.response.send_message(
                 COMMAND_SUCCESS_SUMMONER_REGISTERED.format(summoner_name),

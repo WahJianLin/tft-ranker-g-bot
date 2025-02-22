@@ -1,17 +1,23 @@
+import logging
 from datetime import date, datetime
 
 from src.actions.database import insert_player, get_players, insert_competitors, \
     get_competitor_by_summoner_name, get_competitors_by_summoner_names, update_player_processed
 from src.actions.riot_api import get_ranks, get_summoner_id_call, get_player_data_call
-from src.resources.constants import SlashCommands, REGION_MAP, SERVER_NAME_MAP, LEADER_BOARD_TITLE
+from src.resources.constants import REGION_MAP, SERVER_NAME_MAP, LEADER_BOARD_TITLE, ServerLocationEnum
 from src.resources.entity import Player, PlayerDataRes, Competitor, LeaderboardEntry
 
 
 # Registering into waitlist
-def register_player(summoner_name: str, location: SlashCommands) -> None:
-    display_name: str = summoner_name.split("#")[0]
-    player: Player = Player(None, summoner_name, display_name, REGION_MAP[location], SERVER_NAME_MAP[location],
-                            date.today(), False, None)
+def register_player(summoner_name: str, location: ServerLocationEnum, display_name: str | None,
+                    is_streamer: bool = False) -> None:
+    display_name_to_save: str = display_name if display_name is not None else summoner_name.split("#")[0]
+    join_date: date = date.today()
+    is_processed: bool = False
+    processed_date: date | None = None
+
+    player: Player = Player(None, summoner_name, display_name_to_save, REGION_MAP[location], SERVER_NAME_MAP[location],
+                            join_date, is_processed, processed_date, is_streamer)
     insert_player(player)
 
 
@@ -33,7 +39,7 @@ def process_waitlist() -> None:
             summoner_data_tpl.append(
                 (player.summoner_name, summoner_id, player.display_name, player.riot_server, True, player.id))
         else:
-            print("Failed: Competitor already registered")
+            logging.info("Failed: Competitor already registered")
 
     # processes the players into competitors and updates relevant tables
     if summoner_data_tpl:
@@ -50,7 +56,7 @@ def process_waitlist() -> None:
         if processed_ids:
             update_player_processed(processed_ids)
     else:
-        print('Failed: No Competitor to add')
+        logging.info("Failed: No Competitor to add)")
 
 
 # generating leaderboard
@@ -72,7 +78,7 @@ def gen_ranked_leaderboard_text(leaderboard_entries: list[LeaderboardEntry]) -> 
         if val not in final_leaderboard:
             final_leaderboard.append(val)
 
-    #populates leader board
+    # populates leader board
     for entry in final_leaderboard:
         if last_rank_val != entry.tft_rank_value:
             rank_pos += 1
