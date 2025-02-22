@@ -1,3 +1,4 @@
+import logging
 from datetime import date, datetime
 
 from src.actions.database import insert_player, get_players, insert_competitors, \
@@ -35,11 +36,10 @@ def process_waitlist() -> None:
 
         if get_competitor_by_summoner_name(player.summoner_name) is None:
             player_ids.append(player.id)
-            print('target player', player)
             summoner_data_tpl.append(
                 (player.summoner_name, summoner_id, player.display_name, player.riot_server, True, player.id))
         else:
-            print("Failed: Competitor already registered")
+            logging.info("Failed: Competitor already registered")
 
     # processes the players into competitors and updates relevant tables
     if summoner_data_tpl:
@@ -56,7 +56,7 @@ def process_waitlist() -> None:
         if processed_ids:
             update_player_processed(processed_ids)
     else:
-        print('Failed: No Competitor to add')
+        logging.info("Failed: No Competitor to add)")
 
 
 # generating leaderboard
