@@ -7,8 +7,8 @@ from discord import Intents
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from src.actions.scheduled_actions import schedule_leaderboard_caller
-from src.actions.slash_commands import setup
+from actions.scheduled_actions import schedule_leaderboard_caller
+from slash_commands import setup
 
 load_dotenv()
 DISCORD_TOKEN: Final[str] = os.getenv('DISCORD_TOKEN')
