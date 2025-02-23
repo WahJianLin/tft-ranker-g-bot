@@ -4,11 +4,12 @@ import os
 from typing import Final
 
 from discord import Intents
-from discord.ext import commands, tasks
+from discord.ext import commands
 from dotenv import load_dotenv
 
-from src import slash_commands
+
 from src.actions.scheduled_actions import schedule_leaderboard_caller
+from src.actions.slash_commands import setup
 
 load_dotenv()
 DISCORD_TOKEN: Final[str] = os.getenv('DISCORD_TOKEN')
@@ -38,7 +39,7 @@ async def on_ready() -> None:
 
 
 # main
-slash_commands.setup(client)
+setup(client)
 
 def main():
     asyncio.run(start_bot())
