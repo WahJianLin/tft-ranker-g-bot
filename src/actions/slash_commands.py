@@ -42,7 +42,8 @@ async def join_ranked_race(interaction: discord.Interaction, summoner_name: str,
                            display_name: str | None, is_streamer: bool = False):
     try:
         logging.info(SLASH_COMMANDS.format(SlashCommands.JOIN_RANKED_RACE.value))
-        logging.info(f"With Data -> summoner_name: {summoner_name}, location: {location}, display_name: {display_name}, is_streamer: {is_streamer}")
+        logging.info(
+            f"With Data -> summoner_name: {summoner_name}, location: {location}, display_name: {display_name}, is_streamer: {is_streamer}")
         if not re.search(VALID_SUMMONER_NAME_REGEX, summoner_name):
             await interaction.response.send_message(
                 COMMAND_ERROR_SUMMONER_NAME.format(summoner_name),

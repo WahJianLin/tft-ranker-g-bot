@@ -1,8 +1,7 @@
-#SLASH LOGGING
+# SLASH LOGGING
 
 ERROR_EXISTING_SUMMONER: str = "Failure: {} is already registered."
 PERMISSION_IS_NOT_MOD: str = "User is not a Mod"
-
 
 SLASH_COMMANDS: str = 'Slash Command {} executed'
 COMMAND_SUCCESS: str = 'Command Success'
@@ -14,7 +13,6 @@ COMMAND_SUCCESS_PROCESS: str = "Players have been processed into competitors."
 COMMAND_ERROR_UNEXPECTED: str = "Failure: Unexpected Error"
 COMMAND_ERROR_SUMMONER_NAME: str = "Failure: Invalid Summoner Name {}. Summoner_name should match name#tag format"
 COMMAND_ERROR_SUMMONER_NOT_FOUND: str = "Failure: Summoner Name {} not found on riot database."
-
 
 DATABASE_CALL: str = 'Database Action {} executed'
 DATABASE_SUCCESS: str = 'Database Action Success'
@@ -31,7 +29,6 @@ DB_CALL_UPDATE_PLAYERS_PROCESSED: str = 'update_player_processed'
 DB_CALL_INSERT_PLAYER: str = 'insert_player'
 DB_CALL_INSERT_COMPETITOR: str = 'insert_competitor'
 DB_CALL_INSERT_COMPETITORS: str = 'insert_competitors'
-
 
 RIOT_CALL: str = 'RIOT Call {} executed'
 RIOT_SUCCESS: str = 'RIOT Call Success'
