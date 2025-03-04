@@ -94,6 +94,9 @@ async def process_registered_players(interaction: discord.Interaction):
         logging.exception(e)
         await interaction.response.send_message(COMMAND_ERROR_UNEXPECTED,
                                                 ephemeral=True)
+async def get_unregistered_players(interaction: discord.Interaction):
+    logging.info(SLASH_COMMANDS.format(SlashCommands.TEST.value))
+    await interaction.response.send_message("hello ajumma world unknown")
 
 
 def setup(client: commands.Bot):
@@ -102,6 +105,7 @@ def setup(client: commands.Bot):
                                                          description='generate current leaderboard'))
     client.tree.add_command(discord.app_commands.Command(name='join_ranked_race', callback=join_ranked_race,
                                                          description='Joins Ranked TFT race. Requires Summoner name and region. EX: Player#NA1 NA'))
-    client.tree.add_command(
-        discord.app_commands.Command(name='process_players_wait_list', callback=process_registered_players,
-                                     description='Mod can allow players to join race'))
+    client.tree.add_command(discord.app_commands.Command(name='process_players_wait_list', callback=process_registered_players,
+                                                         description='Mod can allow players to join race'))
+    client.tree.add_command(discord.app_commands.Command(name='get_unprocessed_players', callback=get_unregistered_players,
+                                                         description='Mod can see players to register'))
