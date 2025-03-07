@@ -4,7 +4,8 @@ from datetime import date, datetime
 from src.actions.database import insert_player, get_players, insert_competitors, \
     get_competitor_by_summoner_name, get_competitors_by_summoner_names, update_player_processed
 from src.actions.riot_api import get_ranks, get_summoner_id_call, get_player_data_call
-from src.resources.constants import REGION_MAP, SERVER_NAME_MAP, LEADER_BOARD_TITLE, ServerLocationEnum
+from src.resources.constants import REGION_MAP, SERVER_NAME_MAP, LEADER_BOARD_TITLE, ServerLocationEnum, \
+    UNPROCESSED_PLAYERS_TITLE
 from src.resources.entity import Player, PlayerDataRes, Competitor, LeaderboardEntry
 
 
@@ -19,6 +20,24 @@ def register_player(summoner_name: str, location: ServerLocationEnum, display_na
     player: Player = Player(None, summoner_name, display_name_to_save, REGION_MAP[location], SERVER_NAME_MAP[location],
                             join_date, is_processed, processed_date, is_streamer)
     insert_player(player)
+
+
+# get list of unprocessed players
+
+def get_unprocessed_players() -> str:
+    players_tpl: list[tuple[Player, ...]] = get_players()
+    unprocessed_players_str: str = UNPROCESSED_PLAYERS_TITLE + '\n'
+    unprocessed_players_str += '-' * 30 + '\n'
+    space_in_between: str = 10 * " "
+    for player_tpl in players_tpl:
+        player: Player = Player.from_tuple(player_tpl)
+        player_detail_str = f"Player: {player.summoner_name}," + space_in_between
+        player_detail_str += f"Display Name: {player.display_name}," + space_in_between
+        player_detail_str += f"Register Date: {player.join_date}\n"
+        unprocessed_players_str += player_detail_str
+    unprocessed_players_str += '-' * 30 + '\n'
+
+    return unprocessed_players_str
 
 
 # processing waitlist
