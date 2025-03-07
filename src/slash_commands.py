@@ -5,7 +5,7 @@ import re
 import discord
 from discord.ext import commands
 
-from src.actions.data_actions import register_player, get_leaderboard_result, process_waitlist
+from src.actions.data_actions import register_player, get_leaderboard_result, process_waitlist, get_unprocessed_players
 from src.actions.database import get_player_by_summoner_name
 from src.actions.permission import is_mod
 from src.actions.riot_api import get_player_data_call
@@ -94,9 +94,26 @@ async def process_registered_players(interaction: discord.Interaction):
         logging.exception(e)
         await interaction.response.send_message(COMMAND_ERROR_UNEXPECTED,
                                                 ephemeral=True)
+
+
 async def get_unregistered_players(interaction: discord.Interaction):
-    logging.info(SLASH_COMMANDS.format(SlashCommands.TEST.value))
-    await interaction.response.send_message("hello ajumma world unknown")
+    try:
+        logging.info(SLASH_COMMANDS.format(SlashCommands.GET_UNPROCESSED_PLAYERS.value))
+        if is_mod(interaction.user.roles):
+            await interaction.response.defer()
+            await asyncio.sleep(10)
+
+            process_waitlist()
+
+            await interaction.followup.send(get_unprocessed_players(), ephemeral=True)
+            logging.info(SLASH_COMMANDS.format(COMMAND_SUCCESS))
+        else:
+            await interaction.response.send_message(ONLY_MODS, ephemeral=True)
+    except Exception as e:
+        logging.info(SLASH_COMMANDS.format(COMMAND_FAIL))
+        logging.exception(e)
+        await interaction.response.send_message(COMMAND_ERROR_UNEXPECTED,
+                                                ephemeral=True)
 
 
 def setup(client: commands.Bot):
@@ -105,7 +122,9 @@ def setup(client: commands.Bot):
                                                          description='generate current leaderboard'))
     client.tree.add_command(discord.app_commands.Command(name='join_ranked_race', callback=join_ranked_race,
                                                          description='Joins Ranked TFT race. Requires Summoner name and region. EX: Player#NA1 NA'))
-    client.tree.add_command(discord.app_commands.Command(name='process_players_wait_list', callback=process_registered_players,
-                                                         description='Mod can allow players to join race'))
-    client.tree.add_command(discord.app_commands.Command(name='get_unprocessed_players', callback=get_unregistered_players,
-                                                         description='Mod can see players to register'))
+    client.tree.add_command(
+        discord.app_commands.Command(name='process_players_wait_list', callback=process_registered_players,
+                                     description='Mod can allow players to join race'))
+    client.tree.add_command(
+        discord.app_commands.Command(name='get_unprocessed_players', callback=get_unregistered_players,
+                                     description='Mod can see players to register'))
