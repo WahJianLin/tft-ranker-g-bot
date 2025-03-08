@@ -45,25 +45,30 @@ class PlayerRiotData:
         )
 
 @dataclass
-class Competitor:
-    id: int
+class Competitor_v:
     summoner_name: str
-    summoner_id: str
     display_name: str
     riot_server: str
-    is_competing: bool
-    player_fkey: int
+    player_status: PlayerStatusEnum
+    summoner_id: str
 
     @classmethod
-    def from_tuple(cls, data: tuple):
+    def from_tuple(cls, data: tuple[str, str, str, str, str]) -> "Competitor_v":
         return cls(
-            id=data[0],
-            summoner_name=data[1],
-            summoner_id=data[2],
-            display_name=data[3],
-            riot_server=data[4],
-            is_competing=data[5],
-            player_fkey=data[6]
+            summoner_name=data[0],
+            display_name=data[1],
+            riot_server=data[2],
+            player_status=PlayerStatusEnum(data[3]),  # Convert string to Enum
+            summoner_id=data[4]
+        )
+    @classmethod
+    def constructor(cls, summoner_name_param: str, display_name_param: str, riot_server_param: str, player_status_param: PlayerStatusEnum, summoner_id_param: str):
+        return cls(
+            summoner_name=summoner_name_param,
+            display_name=display_name_param,
+            riot_server=riot_server_param,
+            player_status=player_status_param,
+            summoner_id=summoner_id_param
         )
 
 

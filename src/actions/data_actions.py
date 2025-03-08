@@ -1,12 +1,12 @@
 import logging
 from datetime import date, datetime
 
-from src.actions.database import insert_player, get_players, insert_competitors, \
-    get_competitor_by_summoner_name, get_competitors_by_summoner_names, update_player_processed, get_player_riot_data
+from src.actions.database import insert_player, get_players, insert_player_riot_data, \
+    get_player_riot_data_by_ids, update_player_processed, get_player_riot_data_by_id
 from src.actions.riot_api import get_ranks, get_summoner_id_call, get_player_data_call
 from src.resources.constants import REGION_MAP, SERVER_NAME_MAP, LEADER_BOARD_TITLE, ServerLocationEnum, \
     UNPROCESSED_PLAYERS_TITLE, PlayerStatusEnum
-from src.resources.entity import Player, PlayerDataRes, Competitor, LeaderboardEntry, PlayerRiotData
+from src.resources.entity import Player, PlayerDataRes, LeaderboardEntry, PlayerRiotData
 
 
 # Registering into waitlist
@@ -52,7 +52,7 @@ def process_waitlist() -> None:
         player_data_res: PlayerDataRes = get_player_data_call(player.summoner_name, player.region)
         summoner_id: str | None = get_summoner_id_call(player_data_res.puuid, player.riot_server)
 
-        if get_player_riot_data(player.id) is None:
+        if get_player_riot_data_by_id(player.id) is None:
             player_ids.append(player.id)
             summoner_data_tpl.append(
                 (player.id, summoner_id))
@@ -61,9 +61,9 @@ def process_waitlist() -> None:
 
     # processes the players into competitors and updates relevant tables
     if summoner_data_tpl:
-        insert_competitors(summoner_data_tpl)
+        insert_player_riot_data(summoner_data_tpl)
 
-        processed_competitor_tpl: list[tuple[PlayerRiotData, ...]] = get_competitors_by_summoner_names(player_ids)
+        processed_competitor_tpl: list[tuple[PlayerRiotData, ...]] = get_player_riot_data_by_ids(player_ids)
 
         processed_ids: list[int] = []
 
@@ -99,6 +99,7 @@ def gen_ranked_leaderboard_text(leaderboard_entries: list[LeaderboardEntry]) -> 
     # populates leader board
     for entry in final_leaderboard:
         if last_rank_val != entry.tft_rank_value:
+            last_rank_val = entry.tft_rank_value
             rank_pos += 1
         entry_detail: str = f'{rank_pos}) {entry.display_name}    {entry.tft_rank_title}\n'
         leaderboard_str += entry_detail
