@@ -33,14 +33,14 @@ class Player:
 @dataclass
 class PlayerRiotData:
     id: int
-    player_fkey: int
+    player_id: int
     summoner_id: str
 
     @classmethod
     def from_tuple(cls, data: tuple):
         return cls(
             id=data[0],
-            player_fkey=data[1],
+            player_id=data[1],
             summoner_id=data[2]
         )
 

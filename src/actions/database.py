@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from psycopg2._psycopg import connection, cursor
 
 from src.resources.constants import PlayerStatusEnum
-from src.resources.entity import Player, Competitor
+from src.resources.entity import Player, Competitor, PlayerRiotData
 from src.resources.logging_constants import DATABASE_CALL, DB_CALL_GET_ALL_VALID_COMPETITOR, DATABASE_SUCCESS, \
     DATABASE_FAIL, DB_CALL_GET_VALID_COMPETITOR_BY_NAME, DB_CALL_GET_VALID_COMPETITORS_BY_NAMES, \
     DB_CALL_UPDATE_PLAYERS_PROCESSED, DB_CALL_INSERT_COMPETITOR, ERROR_EXISTING_SUMMONER, DB_CALL_INSERT_PLAYER, \
@@ -140,17 +140,36 @@ def get_competitor_by_summoner_name(summoner_name: str) -> tuple[Player, ...] | 
         logging.info(DATABASE_FAIL)
         logging.exception(e)
 
+def get_player_riot_data(player_id: int) -> tuple[Player, ...] | None:
+    try:
+        logging.info(DATABASE_CALL.format(DB_CALL_GET_VALID_COMPETITOR_BY_NAME))
+        conn: connection = db_base_connect()
+        db_cursor: cursor = conn.cursor()
 
-def get_competitors_by_summoner_names(player_ids: list[int]) -> list[tuple[Competitor, ...]] | None:
+        query: str = f"SELECT * FROM {RIOT_DATA_TABLE} WHERE player_id = %s"
+        db_cursor.execute(query, [player_id])
+        record: tuple[Player, ...] = db_cursor.fetchone()
+
+        db_cursor.close()
+        conn.close()
+
+        logging.info(DATABASE_SUCCESS)
+        return record
+    except Exception as e:
+        logging.info(DATABASE_FAIL)
+        logging.exception(e)
+
+
+def get_competitors_by_summoner_names(player_ids: list[int]) -> list[tuple[PlayerRiotData, ...]] | None:
     try:
         logging.info(DATABASE_CALL.format(DB_CALL_GET_VALID_COMPETITORS_BY_NAMES))
         conn: connection = db_base_connect()
         db_cursor: cursor = conn.cursor()
 
         format_strings = ','.join(['%s'] * len(player_ids))
-        query: str = f"SELECT * FROM {RIOT_DATA_TABLE} WHERE player_fkey IN (%s)" % format_strings
+        query: str = f"SELECT * FROM {RIOT_DATA_TABLE} WHERE player_id IN (%s)" % format_strings
         db_cursor.execute(query, tuple(player_ids))
-        record: list[tuple[Competitor, ...]] = db_cursor.fetchall()
+        record: list[tuple[PlayerRiotData, ...]] = db_cursor.fetchall()
 
         db_cursor.close()
         conn.close()
@@ -170,8 +189,10 @@ def update_player_processed(player_ids: list[int]) -> None:
 
         today: date = date.today()
 
-        query: str = "UPDATE players SET is_processed = true, processed_date = %s WHERE id = %s"
-        data: list[tuple[date, int]] = [(today, player_id) for player_id in player_ids]
+        # query: str = f"UPDATE players SET player_status = true, processed_date = %s WHERE id = %s"
+
+        query: str = f"UPDATE {PLAYER_TABLE} SET player_status = %s, processed_date = %s WHERE id = %s"
+        data: list[tuple[PlayerStatusEnum, date, int]] = [(PlayerStatusEnum.COMPETING.value, today, player_id) for player_id in player_ids]
 
         db_cursor.executemany(query, data)
 
@@ -208,14 +229,14 @@ def insert_competitor(player: Player, summoner_id: str) -> None:
         logging.exception(e)
 
 
-def insert_competitors(competitors_list: list[tuple[str, str, str, str, bool, int]]) -> None:
+def insert_competitors(competitors_list: list[tuple[int, str]]) -> None:
     try:
         logging.info(DATABASE_CALL.format(DB_CALL_INSERT_COMPETITOR))
         conn: connection = db_base_connect()
         db_cursor: cursor = conn.cursor()
-        query: str = "INSERT INTO public.competitors(summoner_name, summoner_id, display_name, riot_server, is_competing, player_fkey)	VALUES "
+        query: str = f"INSERT INTO public.{RIOT_DATA_TABLE}(player_id, summoner_id)	VALUES "
         args_str = ','.join(
-            db_cursor.mogrify("(%s, %s, %s, %s, %s, %s)", competitor).decode('utf-8') for competitor in
+            db_cursor.mogrify("(%s, %s)", competitor).decode('utf-8') for competitor in
             competitors_list)
 
         db_cursor.execute(query + args_str)

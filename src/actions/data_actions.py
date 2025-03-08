@@ -2,11 +2,11 @@ import logging
 from datetime import date, datetime
 
 from src.actions.database import insert_player, get_players, insert_competitors, \
-    get_competitor_by_summoner_name, get_competitors_by_summoner_names, update_player_processed
+    get_competitor_by_summoner_name, get_competitors_by_summoner_names, update_player_processed, get_player_riot_data
 from src.actions.riot_api import get_ranks, get_summoner_id_call, get_player_data_call
 from src.resources.constants import REGION_MAP, SERVER_NAME_MAP, LEADER_BOARD_TITLE, ServerLocationEnum, \
     UNPROCESSED_PLAYERS_TITLE, PlayerStatusEnum
-from src.resources.entity import Player, PlayerDataRes, Competitor, LeaderboardEntry
+from src.resources.entity import Player, PlayerDataRes, Competitor, LeaderboardEntry, PlayerRiotData
 
 
 # Registering into waitlist
@@ -42,7 +42,7 @@ def get_unprocessed_players() -> str:
 # processing waitlist
 def process_waitlist() -> None:
     players_tpl: list[tuple[Player, ...]] = get_players()
-    summoner_data_tpl: list[tuple[str, str, str, str, bool, int]] = []
+    summoner_data_tpl: list[tuple[int, str]] = []
     player_ids: list[int] = []
 
     # gets list of unregistered players and player ids
@@ -52,10 +52,10 @@ def process_waitlist() -> None:
         player_data_res: PlayerDataRes = get_player_data_call(player.summoner_name, player.region)
         summoner_id: str | None = get_summoner_id_call(player_data_res.puuid, player.riot_server)
 
-        if get_competitor_by_summoner_name(player.summoner_name) is None:
+        if get_player_riot_data(player.id) is None:
             player_ids.append(player.id)
             summoner_data_tpl.append(
-                (player.summoner_name, summoner_id, player.display_name, player.riot_server, True, player.id))
+                (player.id, summoner_id))
         else:
             logging.info("Failed: Competitor already registered")
 
@@ -63,13 +63,13 @@ def process_waitlist() -> None:
     if summoner_data_tpl:
         insert_competitors(summoner_data_tpl)
 
-        processed_competitor_tpl: list[tuple[Competitor, ...]] = get_competitors_by_summoner_names(player_ids)
+        processed_competitor_tpl: list[tuple[PlayerRiotData, ...]] = get_competitors_by_summoner_names(player_ids)
 
         processed_ids: list[int] = []
 
         for competitor_tpl in processed_competitor_tpl:
-            competitor: Competitor = Competitor.from_tuple(competitor_tpl)
-            processed_ids.append(competitor.player_fkey)
+            competitor: PlayerRiotData = PlayerRiotData.from_tuple(competitor_tpl)
+            processed_ids.append(competitor.player_id)
 
         if processed_ids:
             update_player_processed(processed_ids)
