@@ -6,6 +6,7 @@ import psycopg2
 from dotenv import load_dotenv
 from psycopg2._psycopg import connection, cursor
 
+from src.resources.constants import PlayerStatusEnum
 from src.resources.entity import Player, Competitor
 from src.resources.logging_constants import DATABASE_CALL, DB_CALL_GET_ALL_VALID_COMPETITOR, DATABASE_SUCCESS, \
     DATABASE_FAIL, DB_CALL_GET_VALID_COMPETITOR_BY_NAME, DB_CALL_GET_VALID_COMPETITORS_BY_NAMES, \
@@ -14,6 +15,8 @@ from src.resources.logging_constants import DATABASE_CALL, DB_CALL_GET_ALL_VALID
 
 load_dotenv()
 
+PLAYER_TABLE: str = 'players_dev'
+RIOT_DATA_TABLE: str = 'riot_data_dev'
 
 def db_base_connect() -> connection:
     return psycopg2.connect(
@@ -31,7 +34,7 @@ def get_players(is_processed: bool = False) -> list[tuple[Player, ...]]:
         conn: connection = db_base_connect()
         db_cursor: cursor = conn.cursor()
 
-        query: str = "SELECT * FROM players WHERE is_processed = %s"
+        query: str = f"SELECT * FROM {PLAYER_TABLE}"
         db_cursor.execute(query, [str(is_processed)])
         records: list[tuple[Player, ...]] = db_cursor.fetchall()
 
@@ -51,7 +54,7 @@ def get_player_by_summoner_name(summoner_name: str) -> tuple[Player, ...] | None
         conn: connection = db_base_connect()
         db_cursor: cursor = conn.cursor()
 
-        query: str = "SELECT * FROM players WHERE summoner_name = %s"
+        query: str = f"SELECT * FROM {PLAYER_TABLE} WHERE summoner_name = %s"
         db_cursor.execute(query, [summoner_name])
         record: tuple[Player, ...] = db_cursor.fetchone()
 
@@ -71,19 +74,19 @@ def insert_player(player: Player) -> None:
         if get_player_by_summoner_name(player.summoner_name) is None:
             conn: connection = db_base_connect()
             db_cursor: cursor = conn.cursor()
-            values: tuple[str, str, str, str, datetime, bool, datetime, bool] = (
+            values: tuple[str, str, str, str, datetime, datetime, bool, PlayerStatusEnum] = (
                 player.summoner_name,
                 player.display_name,
                 player.region,
                 player.riot_server,
                 player.join_date,
-                player.is_processed,
                 player.processed_date,
-                player.is_streamer
+                player.is_streamer,
+                player.player_status
             )
             db_cursor.execute(
-                "INSERT INTO public.players(summoner_name, display_name, region, riot_server, join_date, "
-                "is_processed, processed_date, is_streamer) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                f"INSERT INTO public.{PLAYER_TABLE}(summoner_name, display_name, region, riot_server, join_date, "
+                "processed_date, is_streamer, player_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
                 values
             )
             conn.commit()
@@ -104,7 +107,7 @@ def get_valid_competitor() -> list[tuple[Competitor, ...]] | None:
         conn: connection = db_base_connect()
         db_cursor: cursor = conn.cursor()
 
-        query: str = "SELECT * FROM competitors WHERE is_competing = true"
+        query: str = f"SELECT * FROM {RIOT_DATA_TABLE} WHERE is_competing = true"
         db_cursor.execute(query)
         record: list[tuple[Competitor, ...]] = db_cursor.fetchall()
 
@@ -124,7 +127,7 @@ def get_competitor_by_summoner_name(summoner_name: str) -> tuple[Player, ...] | 
         conn: connection = db_base_connect()
         db_cursor: cursor = conn.cursor()
 
-        query: str = "SELECT * FROM competitors WHERE summoner_name = %s"
+        query: str = f"SELECT * FROM {RIOT_DATA_TABLE} WHERE summoner_name = %s"
         db_cursor.execute(query, [summoner_name])
         record: tuple[Player, ...] = db_cursor.fetchone()
 
@@ -145,7 +148,7 @@ def get_competitors_by_summoner_names(player_ids: list[int]) -> list[tuple[Compe
         db_cursor: cursor = conn.cursor()
 
         format_strings = ','.join(['%s'] * len(player_ids))
-        query: str = "SELECT * FROM competitors WHERE player_fkey IN (%s)" % format_strings
+        query: str = f"SELECT * FROM {RIOT_DATA_TABLE} WHERE player_fkey IN (%s)" % format_strings
         db_cursor.execute(query, tuple(player_ids))
         record: list[tuple[Competitor, ...]] = db_cursor.fetchall()
 

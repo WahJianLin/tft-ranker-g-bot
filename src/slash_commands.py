@@ -103,8 +103,6 @@ async def get_unregistered_players(interaction: discord.Interaction):
             await interaction.response.defer()
             await asyncio.sleep(10)
 
-            process_waitlist()
-
             await interaction.followup.send(get_unprocessed_players(), ephemeral=True)
             logging.info(SLASH_COMMANDS.format(COMMAND_SUCCESS))
         else:

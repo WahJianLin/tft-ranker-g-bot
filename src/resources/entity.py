@@ -1,6 +1,8 @@
 import datetime
 from dataclasses import dataclass
 
+from src.resources.constants import PlayerStatusEnum
+
 
 @dataclass
 class Player:
@@ -10,9 +12,9 @@ class Player:
     region: str
     riot_server: str
     join_date: datetime
-    is_processed: bool
     processed_date: datetime
     is_streamer: bool
+    player_status: PlayerStatusEnum
 
     @classmethod
     def from_tuple(cls, data: tuple):
@@ -23,11 +25,24 @@ class Player:
             region=data[3],
             riot_server=data[4],
             join_date=data[5],
-            is_processed=bool(data[6]),
-            processed_date=data[7],
-            is_streamer=data[8]
+            processed_date=data[6],
+            is_streamer=data[7],
+            player_status=data[8]
         )
 
+@dataclass
+class PlayerRiotData:
+    id: int
+    player_fkey: int
+    summoner_id: str
+
+    @classmethod
+    def from_tuple(cls, data: tuple):
+        return cls(
+            id=data[0],
+            player_fkey=data[1],
+            summoner_id=data[2]
+        )
 
 @dataclass
 class Competitor:

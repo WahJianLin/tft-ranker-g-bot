@@ -5,7 +5,7 @@ from src.actions.database import insert_player, get_players, insert_competitors,
     get_competitor_by_summoner_name, get_competitors_by_summoner_names, update_player_processed
 from src.actions.riot_api import get_ranks, get_summoner_id_call, get_player_data_call
 from src.resources.constants import REGION_MAP, SERVER_NAME_MAP, LEADER_BOARD_TITLE, ServerLocationEnum, \
-    UNPROCESSED_PLAYERS_TITLE
+    UNPROCESSED_PLAYERS_TITLE, PlayerStatusEnum
 from src.resources.entity import Player, PlayerDataRes, Competitor, LeaderboardEntry
 
 
@@ -14,11 +14,10 @@ def register_player(summoner_name: str, location: ServerLocationEnum, display_na
                     is_streamer: bool = False) -> None:
     display_name_to_save: str = display_name if display_name is not None else summoner_name.split("#")[0]
     join_date: date = date.today()
-    is_processed: bool = False
     processed_date: date | None = None
 
     player: Player = Player(None, summoner_name, display_name_to_save, REGION_MAP[location], SERVER_NAME_MAP[location],
-                            join_date, is_processed, processed_date, is_streamer)
+                            join_date, processed_date, is_streamer, PlayerStatusEnum.UNPROCESSED.value)
     insert_player(player)
 
 
