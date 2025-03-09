@@ -6,7 +6,7 @@ from src.resources.constants import PlayerStatusEnum
 
 @dataclass
 class Player:
-    id: int
+    id: int | None
     summoner_name: str
     display_name: str
     region: str
@@ -17,18 +17,30 @@ class Player:
     player_status: PlayerStatusEnum
 
     @classmethod
-    def from_tuple(cls, data: tuple):
+    def constructor(
+            cls,
+            id_param: int | None,
+            summoner_name_param: str,
+            display_name_param: str,
+            region_param: str,
+            riot_server_param: str,
+            join_date_param: str,
+            processed_date_param: str,
+            is_streamer_param: bool,
+            player_status_param: PlayerStatusEnum
+    ):
         return cls(
-            id=data[0],
-            summoner_name=data[1],
-            display_name=data[2],
-            region=data[3],
-            riot_server=data[4],
-            join_date=data[5],
-            processed_date=data[6],
-            is_streamer=data[7],
-            player_status=data[8]
+            id=id_param,
+            summoner_name=summoner_name_param,
+            display_name=display_name_param,
+            region=region_param,
+            riot_server=riot_server_param,
+            join_date=join_date_param,
+            processed_date=processed_date_param,
+            is_streamer=is_streamer_param,
+            player_status=player_status_param
         )
+
 
 @dataclass
 class PlayerRiotData:
@@ -44,8 +56,9 @@ class PlayerRiotData:
             summoner_id=data[2]
         )
 
+
 @dataclass
-class Competitor_v:
+class CompetitorV:
     summoner_name: str
     display_name: str
     riot_server: str
@@ -53,16 +66,8 @@ class Competitor_v:
     summoner_id: str
 
     @classmethod
-    def from_tuple(cls, data: tuple[str, str, str, str, str]) -> "Competitor_v":
-        return cls(
-            summoner_name=data[0],
-            display_name=data[1],
-            riot_server=data[2],
-            player_status=PlayerStatusEnum(data[3]),  # Convert string to Enum
-            summoner_id=data[4]
-        )
-    @classmethod
-    def constructor(cls, summoner_name_param: str, display_name_param: str, riot_server_param: str, player_status_param: PlayerStatusEnum, summoner_id_param: str):
+    def constructor(cls, summoner_name_param: str, display_name_param: str, riot_server_param: str,
+                    player_status_param: PlayerStatusEnum, summoner_id_param: str):
         return cls(
             summoner_name=summoner_name_param,
             display_name=display_name_param,

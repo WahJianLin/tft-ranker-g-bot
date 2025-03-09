@@ -10,8 +10,12 @@ from src.resources.entity import Player, PlayerDataRes, LeaderboardEntry, Player
 
 
 # Registering into waitlist
-def register_player(summoner_name: str, location: ServerLocationEnum, display_name: str | None,
-                    is_streamer: bool = False) -> None:
+def register_player(
+        summoner_name: str,
+        location: ServerLocationEnum,
+        display_name: str | None,
+        is_streamer: bool = False
+) -> None:
     display_name_to_save: str = display_name if display_name is not None else summoner_name.split("#")[0]
     join_date: date = date.today()
     processed_date: date | None = None
@@ -22,14 +26,12 @@ def register_player(summoner_name: str, location: ServerLocationEnum, display_na
 
 
 # get list of unprocessed players
-
 def get_unprocessed_players() -> str:
-    players_tpl: list[tuple[Player, ...]] = get_players()
+    player_list: list[Player] = get_players()
     unprocessed_players_str: str = UNPROCESSED_PLAYERS_TITLE + '\n'
     unprocessed_players_str += '-' * 30 + '\n'
     space_in_between: str = 10 * " "
-    for player_tpl in players_tpl:
-        player: Player = Player.from_tuple(player_tpl)
+    for player in player_list:
         player_detail_str = f"Player: {player.summoner_name}," + space_in_between
         player_detail_str += f"Display Name: {player.display_name}," + space_in_between
         player_detail_str += f"Register Date: {player.join_date}\n"
@@ -41,13 +43,12 @@ def get_unprocessed_players() -> str:
 
 # processing waitlist
 def process_waitlist() -> None:
-    players_tpl: list[tuple[Player, ...]] = get_players()
+    player_list: list[Player] = get_players()
     summoner_data_tpl: list[tuple[int, str]] = []
     player_ids: list[int] = []
 
     # gets list of unregistered players and player ids
-    for player_tpl in players_tpl:
-        player: Player = Player.from_tuple(player_tpl)
+    for player in player_list:
 
         player_data_res: PlayerDataRes = get_player_data_call(player.summoner_name, player.region)
         summoner_id: str | None = get_summoner_id_call(player_data_res.puuid, player.riot_server)
