@@ -101,5 +101,11 @@ class SlashCommands(Enum):
     PROCESS_PLAYERS = 'process_players_wait_list'
     GET_UNPROCESSED_PLAYERS= 'get_unprocessed_players'
 
+class PlayerStatusEnum(Enum):
+    UNPROCESSED = 'unprocessed'
+    COMPETING = 'competing'
+    NOT_COMPETING = 'not_competing'
+    BANNED = 'banned'
+
 ONLY_MODS: str = "Only Mods can use this command"
 VALID_SUMMONER_NAME_REGEX: str = "\\w#\\w"

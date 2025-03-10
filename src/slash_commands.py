@@ -78,7 +78,7 @@ async def join_ranked_race(interaction: discord.Interaction, summoner_name: str,
 
 async def process_registered_players(interaction: discord.Interaction):
     try:
-        logging.info(SLASH_COMMANDS.format(SlashCommands.JOIN_RANKED_RACE.value))
+        logging.info(SLASH_COMMANDS.format(SlashCommands.PROCESS_PLAYERS.value))
         if is_mod(interaction.user.roles):
             await interaction.response.defer()
             await asyncio.sleep(10)
@@ -102,8 +102,6 @@ async def get_unregistered_players(interaction: discord.Interaction):
         if is_mod(interaction.user.roles):
             await interaction.response.defer()
             await asyncio.sleep(10)
-
-            process_waitlist()
 
             await interaction.followup.send(get_unprocessed_players(), ephemeral=True)
             logging.info(SLASH_COMMANDS.format(COMMAND_SUCCESS))

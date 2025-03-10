@@ -1,6 +1,8 @@
 import datetime
 from dataclasses import dataclass
 
+from src.resources.constants import PlayerStatusEnum
+
 
 @dataclass
 class Player:
@@ -10,45 +12,82 @@ class Player:
     region: str
     riot_server: str
     join_date: datetime
-    is_processed: bool
     processed_date: datetime
     is_streamer: bool
+    player_status: PlayerStatusEnum
 
     @classmethod
-    def from_tuple(cls, data: tuple):
+    def constructor(
+            cls,
+            id_param: int,
+            summoner_name_param: str,
+            display_name_param: str,
+            region_param: str,
+            riot_server_param: str,
+            join_date_param: str,
+            processed_date_param: str,
+            is_streamer_param: bool,
+            player_status_param: PlayerStatusEnum
+    ):
         return cls(
-            id=data[0],
-            summoner_name=data[1],
-            display_name=data[2],
-            region=data[3],
-            riot_server=data[4],
-            join_date=data[5],
-            is_processed=bool(data[6]),
-            processed_date=data[7],
-            is_streamer=data[8]
+            id=id_param,
+            summoner_name=summoner_name_param,
+            display_name=display_name_param,
+            region=region_param,
+            riot_server=riot_server_param,
+            join_date=join_date_param,
+            processed_date=processed_date_param,
+            is_streamer=is_streamer_param,
+            player_status=player_status_param
         )
 
 
 @dataclass
-class Competitor:
+class PlayerRiotData:
     id: int
-    summoner_name: str
+    player_id: int
     summoner_id: str
-    display_name: str
-    riot_server: str
-    is_competing: bool
-    player_fkey: int
 
     @classmethod
     def from_tuple(cls, data: tuple):
         return cls(
             id=data[0],
-            summoner_name=data[1],
-            summoner_id=data[2],
-            display_name=data[3],
-            riot_server=data[4],
-            is_competing=data[5],
-            player_fkey=data[6]
+            player_id=data[1],
+            summoner_id=data[2]
+        )
+
+    @classmethod
+    def constructor(
+            cls,
+            id_param: int | None,
+            player_id_param: int,
+            summoner_id_param: str,
+
+    ):
+        return cls(
+            id=id_param,
+            player_id=player_id_param,
+            summoner_id=summoner_id_param,
+        )
+
+
+@dataclass
+class CompetitorV:
+    summoner_name: str
+    display_name: str
+    riot_server: str
+    player_status: PlayerStatusEnum
+    summoner_id: str
+
+    @classmethod
+    def constructor(cls, summoner_name_param: str, display_name_param: str, riot_server_param: str,
+                    player_status_param: PlayerStatusEnum, summoner_id_param: str):
+        return cls(
+            summoner_name=summoner_name_param,
+            display_name=display_name_param,
+            riot_server=riot_server_param,
+            player_status=player_status_param,
+            summoner_id=summoner_id_param
         )
 
 
@@ -64,6 +103,14 @@ class PlayerDataRes:
             puuid=data.get("puuid", ""),
             game_name=data.get("gameName", ""),
             tag_line=data.get("tagLine", "")
+        )
+    @classmethod
+    def constructor(cls, puuid_param: str, game_name_param: str, tag_line_param: str,
+                    ):
+        return cls(
+            puuid=puuid_param,
+            game_name=game_name_param,
+            tag_line=tag_line_param,
         )
 
 

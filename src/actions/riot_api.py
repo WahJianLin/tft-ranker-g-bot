@@ -6,10 +6,10 @@ import requests
 from dotenv import load_dotenv
 from requests import Response
 
-from src.actions.database import get_valid_competitor
+from src.actions.database import get_competitors_by_status
 from src.resources.constants import QUEUE_TYPE, RANKED_QUEUE_TYPE, TIER, RANK, \
     LEAGUE_POINTS, RiotTiersEnum, RiotRanksEnum
-from src.resources.entity import PlayerDataRes, LeaderboardEntry, Competitor
+from src.resources.entity import PlayerDataRes, LeaderboardEntry, CompetitorV
 from src.resources.logging_constants import RIOT_FAIL, RIOT_ERROR_CODE, RIOT_SUCCESS, RIOT_CALL, \
     RIOT_CALL_GET_RANK_DATA, RIOT_CALL_GET_SUMMONER_ID, RIOT_CALL_GET_PLAYER_DATA_CALL
 
@@ -67,7 +67,7 @@ def get_summoner_id_call(puuid: str, server: str) -> str | None:
         return None
 
 
-def get_rank_data(competitor: Competitor) -> LeaderboardEntry | None:
+def get_rank_data(competitor: CompetitorV) -> LeaderboardEntry | None:
     url = GET_RANK_DATA_URL.format(competitor.riot_server, competitor.summoner_id, RIOT_API_KEY)
     try:
         logging.info(RIOT_CALL.format(RIOT_CALL_GET_RANK_DATA))
@@ -107,10 +107,9 @@ def get_rank_data(competitor: Competitor) -> LeaderboardEntry | None:
 
 def get_ranks() -> list[LeaderboardEntry]:
     leaderboard_entries: list[LeaderboardEntry] = []
-    valid_competitors: list[tuple[Competitor, ...]] = get_valid_competitor()
+    valid_competitors: list[CompetitorV] = get_competitors_by_status()
 
-    for entry in valid_competitors:
-        competitor: Competitor = Competitor.from_tuple(entry)
+    for competitor in valid_competitors:
         leaderboard_entry: LeaderboardEntry = get_rank_data(competitor)
         if leaderboard_entry:
             leaderboard_entries.append(leaderboard_entry)
