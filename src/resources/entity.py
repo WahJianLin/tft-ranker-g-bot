@@ -56,6 +56,20 @@ class PlayerRiotData:
             summoner_id=data[2]
         )
 
+    @classmethod
+    def constructor(
+            cls,
+            id_param: int | None,
+            player_id_param: int,
+            summoner_id_param: str,
+
+    ):
+        return cls(
+            id=id_param,
+            player_id=player_id_param,
+            summoner_id=summoner_id_param,
+        )
+
 
 @dataclass
 class CompetitorV:
@@ -89,6 +103,14 @@ class PlayerDataRes:
             puuid=data.get("puuid", ""),
             game_name=data.get("gameName", ""),
             tag_line=data.get("tagLine", "")
+        )
+    @classmethod
+    def constructor(cls, puuid_param: str, game_name_param: str, tag_line_param: str,
+                    ):
+        return cls(
+            puuid=puuid_param,
+            game_name=game_name_param,
+            tag_line=tag_line_param,
         )
 
 

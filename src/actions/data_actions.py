@@ -4,6 +4,7 @@ from datetime import date, datetime
 from src.actions.database import insert_player, get_players, insert_player_riot_data, \
     get_player_riot_data_by_ids, update_player_processed, get_player_riot_data_by_id
 from src.actions.riot_api import get_ranks, get_summoner_id_call, get_player_data_call
+from src.actions.util import format_str_spacing_util
 from src.resources.constants import REGION_MAP, SERVER_NAME_MAP, LEADER_BOARD_TITLE, ServerLocationEnum, \
     UNPROCESSED_PLAYERS_TITLE, PlayerStatusEnum
 from src.resources.entity import Player, PlayerDataRes, LeaderboardEntry, PlayerRiotData
@@ -29,14 +30,18 @@ def register_player(
 def get_unprocessed_players() -> str:
     player_list: list[Player] = get_players()
     unprocessed_players_str: str = UNPROCESSED_PLAYERS_TITLE + '\n'
-    unprocessed_players_str += '-' * 30 + '\n'
-    space_in_between: str = 10 * " "
+    unprocessed_players_str += '-' * 100 + '\n'
+    space_in_between: int = 50
     for player in player_list:
-        player_detail_str = f"Player: {player.summoner_name}," + space_in_between
-        player_detail_str += f"Display Name: {player.display_name}," + space_in_between
-        player_detail_str += f"Register Date: {player.join_date}\n"
+        player_name_str = f"Player: {player.summoner_name}"
+        player_name_str = format_str_spacing_util(player_name_str, space_in_between)
+        display_name_str: str = f"Display Name: {player.display_name}"
+        display_name_str = format_str_spacing_util(display_name_str, space_in_between)
+        register_date_str = f"Register Date: {player.join_date}\n"
+
+        player_detail_str: str = player_name_str + display_name_str + register_date_str
         unprocessed_players_str += player_detail_str
-    unprocessed_players_str += '-' * 30 + '\n'
+    unprocessed_players_str += '-' * 100 + '\n'
 
     return unprocessed_players_str
 
@@ -64,13 +69,12 @@ def process_waitlist() -> None:
     if summoner_data_tpl:
         insert_player_riot_data(summoner_data_tpl)
 
-        processed_competitor_tpl: list[tuple[PlayerRiotData, ...]] = get_player_riot_data_by_ids(player_ids)
+        player_riot_data_list: list[PlayerRiotData] = get_player_riot_data_by_ids(player_ids)
 
         processed_ids: list[int] = []
 
-        for competitor_tpl in processed_competitor_tpl:
-            competitor: PlayerRiotData = PlayerRiotData.from_tuple(competitor_tpl)
-            processed_ids.append(competitor.player_id)
+        for player_riot_data in player_riot_data_list:
+            processed_ids.append(player_riot_data.player_id)
 
         if processed_ids:
             update_player_processed(processed_ids)

@@ -32,7 +32,7 @@ def db_base_connect() -> connection:
     )
 
 
-def get_players(status: PlayerStatusEnum = PlayerStatusEnum.COMPETING) -> list[Player]:
+def get_players(status: PlayerStatusEnum = PlayerStatusEnum.UNPROCESSED) -> list[Player]:
     try:
         logging.info(DATABASE_CALL.format(DB_CALL_GET_PLAYERS))
         conn: connection = db_base_connect()
@@ -195,16 +195,22 @@ def get_player_riot_data_by_ids(player_ids: list[int]) -> list[PlayerRiotData] |
         conn: connection = db_base_connect()
         db_cursor: cursor = conn.cursor()
 
+        player_riot_data_list: list[PlayerRiotData] = []
+
         format_strings = ','.join(['%s'] * len(player_ids))
         query: str = f"SELECT * FROM {SCHEMA}.{RIOT_DATA_TABLE} WHERE player_id IN (%s)" % format_strings
         db_cursor.execute(query, tuple(player_ids))
-        record: list[tuple[PlayerRiotData, ...]] = db_cursor.fetchall()
+        records: list[tuple[any, ...]] = db_cursor.fetchall()
+
+        for player_data_tpl in records:
+            player_data: PlayerRiotData = PlayerRiotData.constructor(player_data_tpl[0],player_data_tpl[1],player_data_tpl[2])
+            player_riot_data_list.append(player_data)
 
         db_cursor.close()
         conn.close()
 
         logging.info(DATABASE_SUCCESS)
-        return record
+        return player_riot_data_list
     except Exception as e:
         logging.info(DATABASE_FAIL)
         logging.exception(e)
@@ -238,7 +244,7 @@ def update_player_processed(player_ids: list[int]) -> None:
 def insert_competitor(player: Player, summoner_id: str) -> None:
     try:
         logging.info(DATABASE_CALL.format(DB_CALL_INSERT_COMPETITOR))
-        if get_competitor_by_summoner_name(player.summoner_name) is None:
+        if get_competitor_by_summoner_name(player.id) is None:
             conn: connection = db_base_connect()
             db_cursor: cursor = conn.cursor()
             query: str = f"INSERT INTO {SCHEMA}.{RIOT_DATA_TABLE}(player_id, summoner_id)	VALUES (%s, %s)"
