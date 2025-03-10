@@ -70,11 +70,15 @@ def get_player_by_summoner_name(summoner_name: str) -> Player | None:
         db_cursor.execute(query, [summoner_name])
         record: tuple[any, ...] = db_cursor.fetchone()
 
-        player: Player = Player.constructor(record[0], record[1], record[2], record[3], record[4], record[5], record[6],
-                                            record[7], record[8])
-
         db_cursor.close()
         conn.close()
+
+        if record is None:
+            logging.info(DATABASE_SUCCESS)
+            return None
+
+        player: Player = Player.constructor(record[0], record[1], record[2], record[3], record[4], record[5], record[6],
+                                            record[7], record[8])
 
         logging.info(DATABASE_SUCCESS)
         return player
@@ -176,12 +180,15 @@ def get_player_riot_data_by_id(player_id: int) -> Player | None:
         db_cursor.execute(query, [player_id])
         record: tuple[any, ...] = db_cursor.fetchone()
 
-        player: Player = Player.constructor(record[0], record[1], record[2], record[3], record[4], record[5], record[6],
-                                            record[7], record[8])
-
         db_cursor.close()
         conn.close()
 
+        if record is None:
+            logging.info(DATABASE_SUCCESS)
+            return None
+
+        player: Player = Player.constructor(record[0], record[1], record[2], record[3], record[4], record[5], record[6],
+                                            record[7], record[8])
         logging.info(DATABASE_SUCCESS)
         return player
     except Exception as e:
@@ -203,7 +210,8 @@ def get_player_riot_data_by_ids(player_ids: list[int]) -> list[PlayerRiotData] |
         records: list[tuple[any, ...]] = db_cursor.fetchall()
 
         for player_data_tpl in records:
-            player_data: PlayerRiotData = PlayerRiotData.constructor(player_data_tpl[0],player_data_tpl[1],player_data_tpl[2])
+            player_data: PlayerRiotData = PlayerRiotData.constructor(player_data_tpl[0], player_data_tpl[1],
+                                                                     player_data_tpl[2])
             player_riot_data_list.append(player_data)
 
         db_cursor.close()

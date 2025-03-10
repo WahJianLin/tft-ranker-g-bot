@@ -30,7 +30,7 @@ def register_player(
 def get_unprocessed_players() -> str:
     player_list: list[Player] = get_players()
     unprocessed_players_str: str = UNPROCESSED_PLAYERS_TITLE + '\n'
-    unprocessed_players_str += '-' * 100 + '\n'
+    unprocessed_players_str += '-' * 120 + '\n'
     space_in_between: int = 50
     for player in player_list:
         player_name_str = f"Player: {player.summoner_name}"
@@ -41,7 +41,7 @@ def get_unprocessed_players() -> str:
 
         player_detail_str: str = player_name_str + display_name_str + register_date_str
         unprocessed_players_str += player_detail_str
-    unprocessed_players_str += '-' * 100 + '\n'
+    unprocessed_players_str += '-' * 120 + '\n'
 
     return unprocessed_players_str
 
@@ -79,7 +79,7 @@ def process_waitlist() -> None:
         if processed_ids:
             update_player_processed(processed_ids)
     else:
-        logging.info("Failed: No Competitor to add)")
+        logging.info("Failed: No Competitor to add")
 
 
 # generating leaderboard
@@ -91,7 +91,7 @@ def gen_ranked_leaderboard_text(leaderboard_entries: list[LeaderboardEntry]) -> 
     now: datetime = datetime.now()
     dt_string: str = now.strftime('%B %d, %Y %I:%M:%S %p')
     leaderboard_str: str = LEADER_BOARD_TITLE + dt_string + '\n'
-    leaderboard_str += '-' * 30 + '\n'
+    leaderboard_str += '-' * 80 + '\n'
     rank_pos: int = 0
     last_rank_val: int = -1
     final_leaderboard: list[LeaderboardEntry] = []
@@ -106,9 +106,11 @@ def gen_ranked_leaderboard_text(leaderboard_entries: list[LeaderboardEntry]) -> 
         if last_rank_val != entry.tft_rank_value:
             last_rank_val = entry.tft_rank_value
             rank_pos += 1
-        entry_detail: str = f'{rank_pos}) {entry.display_name}    {entry.tft_rank_title}\n'
+        player_name_rank: str = f'{rank_pos}) {entry.display_name}'
+        player_name_rank = format_str_spacing_util(player_name_rank,25)
+        entry_detail: str = f'{player_name_rank}{entry.tft_rank_title}\n'
         leaderboard_str += entry_detail
-    leaderboard_str += '-' * 30
+    leaderboard_str += '-' * 80
     return leaderboard_str
 
 

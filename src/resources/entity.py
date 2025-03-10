@@ -6,7 +6,7 @@ from src.resources.constants import PlayerStatusEnum
 
 @dataclass
 class Player:
-    id: int | None
+    id: int
     summoner_name: str
     display_name: str
     region: str
@@ -19,7 +19,7 @@ class Player:
     @classmethod
     def constructor(
             cls,
-            id_param: int | None,
+            id_param: int,
             summoner_name_param: str,
             display_name_param: str,
             region_param: str,

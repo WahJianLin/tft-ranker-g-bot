@@ -1,4 +1,4 @@
-def format_str_spacing_util(sentence:str, spaces_in_between: int) -> str:
+def format_str_spacing_util(sentence:str, spaces_in_between: int = 50) -> str:
     sentence_length: int = len(sentence)
     space_dif: int = spaces_in_between - sentence_length
     formatted_sentence: str = sentence
