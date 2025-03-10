@@ -53,11 +53,12 @@ def get_players(status: PlayerStatusEnum = PlayerStatusEnum.UNPROCESSED) -> list
         db_cursor.close()
         conn.close()
 
-        logging.info(DATABASE_SUCCESS)
+        logging.info(DATABASE_SUCCESS.format(DB_CALL_GET_PLAYERS))
         return player_list
     except Exception as e:
-        logging.info(DATABASE_FAIL)
+        logging.info(DATABASE_FAIL.format(DB_CALL_GET_PLAYERS))
         logging.exception(e)
+        raise Exception(format(e)) from None
 
 
 def get_player_by_summoner_name(summoner_name: str) -> Player | None:
@@ -74,17 +75,18 @@ def get_player_by_summoner_name(summoner_name: str) -> Player | None:
         conn.close()
 
         if record is None:
-            logging.info(DATABASE_SUCCESS)
+            logging.info(DATABASE_SUCCESS.format(DB_CALL_GET_PLAYER_BY_NAME))
             return None
 
         player: Player = Player.constructor(record[0], record[1], record[2], record[3], record[4], record[5], record[6],
                                             record[7], record[8])
 
-        logging.info(DATABASE_SUCCESS)
+        logging.info(DATABASE_SUCCESS.format(DB_CALL_GET_PLAYER_BY_NAME))
         return player
     except Exception as e:
-        logging.info(DATABASE_FAIL)
+        logging.info(DATABASE_FAIL.format(DB_CALL_GET_PLAYER_BY_NAME))
         logging.exception(e)
+        raise Exception(format(e)) from None
 
 
 def insert_player(player: Player) -> None:
@@ -93,7 +95,7 @@ def insert_player(player: Player) -> None:
         if get_player_by_summoner_name(player.summoner_name) is None:
             conn: connection = db_base_connect()
             db_cursor: cursor = conn.cursor()
-            values: tuple[str, str, str, str, datetime, datetime, bool, PlayerStatusEnum] = (
+            values: tuple[str, str, str, str, datetime, datetime, bool, PlayerStatusEnum, int] = (
                 player.summoner_name,
                 player.display_name,
                 player.region,
@@ -101,23 +103,25 @@ def insert_player(player: Player) -> None:
                 player.join_date,
                 player.processed_date,
                 player.is_streamer,
-                player.player_status
+                player.player_status,
+                player.discord_id
             )
             db_cursor.execute(
                 f"INSERT INTO {SCHEMA}.{PLAYER_TABLE}(summoner_name, display_name, region, riot_server, join_date, "
-                "processed_date, is_streamer, player_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                "processed_date, is_streamer, player_status, discord_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
                 values
             )
             conn.commit()
             db_cursor.close()
             conn.close()
 
-            logging.info(DATABASE_SUCCESS)
+            logging.info(DATABASE_SUCCESS.format(DB_CALL_INSERT_PLAYER))
         else:
             logging.info(ERROR_EXISTING_SUMMONER.format(player.summoner_name))
     except Exception as e:
-        logging.info(DATABASE_FAIL)
+        logging.info(DATABASE_FAIL.format(DB_CALL_INSERT_PLAYER))
         logging.exception(e)
+        raise Exception(format(e)) from None
 
 
 def get_competitors_by_status() -> list[CompetitorV] | None:
@@ -139,11 +143,12 @@ def get_competitors_by_status() -> list[CompetitorV] | None:
         db_cursor.close()
         conn.close()
 
-        logging.info(DATABASE_SUCCESS)
+        logging.info(DATABASE_SUCCESS.format(DB_CALL_GET_ALL_VALID_COMPETITOR))
         return competitor_list
     except Exception as e:
-        logging.info(DATABASE_FAIL)
+        logging.info(DATABASE_FAIL.format(DB_CALL_GET_ALL_VALID_COMPETITOR))
         logging.exception(e)
+        raise Exception(format(e)) from None
 
 
 # deprecated
@@ -163,11 +168,12 @@ def get_competitor_by_summoner_name(player_id: int) -> Player | None:
         db_cursor.close()
         conn.close()
 
-        logging.info(DATABASE_SUCCESS)
+        logging.info(DATABASE_SUCCESS.format(DB_CALL_GET_VALID_COMPETITOR_BY_NAME))
         return player
     except Exception as e:
-        logging.info(DATABASE_FAIL)
+        logging.info(DATABASE_FAIL.format(DB_CALL_GET_VALID_COMPETITOR_BY_NAME))
         logging.exception(e)
+        raise Exception(format(e)) from None
 
 
 def get_player_riot_data_by_id(player_id: int) -> Player | None:
@@ -184,16 +190,17 @@ def get_player_riot_data_by_id(player_id: int) -> Player | None:
         conn.close()
 
         if record is None:
-            logging.info(DATABASE_SUCCESS)
+            logging.info(DATABASE_SUCCESS.format(DB_CALL_GET_VALID_COMPETITOR_BY_NAME))
             return None
 
         player: Player = Player.constructor(record[0], record[1], record[2], record[3], record[4], record[5], record[6],
                                             record[7], record[8])
-        logging.info(DATABASE_SUCCESS)
+        logging.info(DATABASE_SUCCESS.format(DB_CALL_GET_VALID_COMPETITOR_BY_NAME))
         return player
     except Exception as e:
-        logging.info(DATABASE_FAIL)
+        logging.info(DATABASE_FAIL.format(DB_CALL_GET_VALID_COMPETITOR_BY_NAME))
         logging.exception(e)
+        raise Exception(format(e)) from None
 
 
 def get_player_riot_data_by_ids(player_ids: list[int]) -> list[PlayerRiotData] | None:
@@ -217,11 +224,12 @@ def get_player_riot_data_by_ids(player_ids: list[int]) -> list[PlayerRiotData] |
         db_cursor.close()
         conn.close()
 
-        logging.info(DATABASE_SUCCESS)
+        logging.info(DATABASE_SUCCESS.format(DB_CALL_GET_VALID_COMPETITORS_BY_NAMES))
         return player_riot_data_list
     except Exception as e:
-        logging.info(DATABASE_FAIL)
+        logging.info(DATABASE_FAIL.format(DB_CALL_GET_VALID_COMPETITORS_BY_NAMES))
         logging.exception(e)
+        raise Exception(format(e)) from None
 
 
 def update_player_processed(player_ids: list[int]) -> None:
@@ -242,10 +250,11 @@ def update_player_processed(player_ids: list[int]) -> None:
         db_cursor.close()
         conn.close()
 
-        logging.info(DATABASE_SUCCESS)
+        logging.info(DATABASE_SUCCESS.format(DB_CALL_UPDATE_PLAYERS_PROCESSED))
     except Exception as e:
-        logging.info(DATABASE_FAIL)
+        logging.info(DATABASE_FAIL.format(DB_CALL_UPDATE_PLAYERS_PROCESSED))
         logging.exception(e)
+        raise Exception(format(e)) from None
 
 
 # untested
@@ -264,12 +273,13 @@ def insert_competitor(player: Player, summoner_id: str) -> None:
             db_cursor.close()
             conn.close()
 
-            logging.info(DATABASE_SUCCESS)
+            logging.info(DATABASE_SUCCESS.format(DB_CALL_INSERT_COMPETITOR))
         else:
             logging.info(ERROR_EXISTING_SUMMONER.format(player.summoner_name))
     except Exception as e:
-        logging.info(DATABASE_FAIL)
+        logging.info(DATABASE_FAIL.format(DB_CALL_INSERT_COMPETITOR))
         logging.exception(e)
+        raise Exception(format(e)) from None
 
 
 def insert_player_riot_data(competitors_list: list[tuple[int, str]]) -> None:
@@ -288,7 +298,8 @@ def insert_player_riot_data(competitors_list: list[tuple[int, str]]) -> None:
         db_cursor.close()
         conn.close()
 
-        logging.info(DATABASE_SUCCESS)
+        logging.info(DATABASE_SUCCESS.format(DB_CALL_INSERT_COMPETITOR))
     except Exception as e:
-        logging.info(DATABASE_FAIL)
+        logging.info(DATABASE_FAIL.format(DB_CALL_INSERT_COMPETITOR))
         logging.exception(e)
+        raise Exception(format(e)) from None

@@ -44,21 +44,22 @@ async def join_ranked_race(interaction: discord.Interaction, summoner_name: str,
         logging.info(SLASH_COMMANDS.format(SlashCommands.JOIN_RANKED_RACE.value))
         logging.info(
             f"With Data -> summoner_name: {summoner_name}, location: {location}, display_name: {display_name}, is_streamer: {is_streamer}")
+
+        await interaction.response.defer()
+        await asyncio.sleep(10)
+
         if not re.search(VALID_SUMMONER_NAME_REGEX, summoner_name):
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 COMMAND_ERROR_SUMMONER_NAME.format(summoner_name),
                 ephemeral=True)
         elif get_player_by_summoner_name(summoner_name) is not None:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 ERROR_EXISTING_SUMMONER.format(summoner_name),
                 ephemeral=True)
         # To Do filter out malicious display names
         elif get_player_data_call(summoner_name, REGION_MAP[location]):
             # registers player
-            await interaction.response.defer()
-            await asyncio.sleep(10)
-
-            register_player(summoner_name, location, display_name, is_streamer)
+            register_player(summoner_name, location, display_name, interaction.user.id, is_streamer)
 
             logging.info(SLASH_COMMANDS.format(COMMAND_SUCCESS))
             await interaction.followup.send(
@@ -66,14 +67,15 @@ async def join_ranked_race(interaction: discord.Interaction, summoner_name: str,
                 ephemeral=True)
             logging.info(SLASH_COMMANDS.format(SlashCommands.JOIN_RANKED_RACE.value))
         else:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 COMMAND_ERROR_SUMMONER_NOT_FOUND.format(summoner_name),
                 ephemeral=True)
     except Exception as e:
         logging.info(SLASH_COMMANDS.format(COMMAND_FAIL))
         logging.exception(e)
-        await interaction.response.send_message(COMMAND_ERROR_UNEXPECTED,
-                                                ephemeral=True)
+        await interaction.followup.send(
+            COMMAND_ERROR_UNEXPECTED,
+            ephemeral=True)
 
 
 async def process_registered_players(interaction: discord.Interaction):

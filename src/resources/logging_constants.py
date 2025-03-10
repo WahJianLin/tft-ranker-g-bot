@@ -15,8 +15,8 @@ COMMAND_ERROR_SUMMONER_NAME: str = "Failure: Invalid Summoner Name {}. Summoner_
 COMMAND_ERROR_SUMMONER_NOT_FOUND: str = "Failure: Summoner Name {} not found on riot database."
 
 DATABASE_CALL: str = 'Database Action {} executed'
-DATABASE_SUCCESS: str = 'Database Action Success'
-DATABASE_FAIL: str = 'Database Action Failure'
+DATABASE_SUCCESS: str = 'Database Action {} Success'
+DATABASE_FAIL: str = 'Database Action {} Failure'
 
 DB_CALL_GET_PLAYERS: str = 'get_players'
 DB_CALL_GET_PLAYER_BY_NAME: str = 'get_player_by_summoner_name'

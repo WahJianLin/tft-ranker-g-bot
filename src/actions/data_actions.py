@@ -15,6 +15,7 @@ def register_player(
         summoner_name: str,
         location: ServerLocationEnum,
         display_name: str | None,
+        discord_id: int,
         is_streamer: bool = False
 ) -> None:
     display_name_to_save: str = display_name if display_name is not None else summoner_name.split("#")[0]
@@ -22,7 +23,7 @@ def register_player(
     processed_date: date | None = None
 
     player: Player = Player(None, summoner_name, display_name_to_save, REGION_MAP[location], SERVER_NAME_MAP[location],
-                            join_date, processed_date, is_streamer, PlayerStatusEnum.UNPROCESSED.value)
+                            join_date, processed_date, is_streamer, PlayerStatusEnum.UNPROCESSED.value, discord_id)
     insert_player(player)
 
 

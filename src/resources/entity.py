@@ -15,6 +15,7 @@ class Player:
     processed_date: datetime
     is_streamer: bool
     player_status: PlayerStatusEnum
+    discord_id: int
 
     @classmethod
     def constructor(
