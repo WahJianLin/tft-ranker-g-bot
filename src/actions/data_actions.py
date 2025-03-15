@@ -28,9 +28,9 @@ def register_player(
 
 
 # get list of unprocessed players
-def get_unprocessed_players() -> str:
-    player_list: list[Player] = get_players()
-    unprocessed_players_str: str = UNPROCESSED_PLAYERS_TITLE + '\n'
+def get_player_by_status(status: PlayerStatusEnum) -> str:
+    player_list: list[Player] = get_players(status)
+    unprocessed_players_str: str = UNPROCESSED_PLAYERS_TITLE.format(status.value) + '\n'
     unprocessed_players_str += '-' * 120 + '\n'
     space_in_between: int = 50
     for player in player_list:

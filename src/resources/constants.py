@@ -92,7 +92,7 @@ SUMMONER_NAME: str = 'summoner_name'
 DISPLAY_NAME: str = 'display_name'
 
 LEADER_BOARD_TITLE: str = 'Leaderboard rank: '
-UNPROCESSED_PLAYERS_TITLE: str = 'List of players on waitlist: '
+UNPROCESSED_PLAYERS_TITLE: str = 'List of {} players'
 
 
 class SlashCommands(Enum):
