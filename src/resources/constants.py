@@ -94,18 +94,21 @@ DISPLAY_NAME: str = 'display_name'
 LEADER_BOARD_TITLE: str = 'Leaderboard rank: '
 UNPROCESSED_PLAYERS_TITLE: str = 'List of players on waitlist: '
 
+
 class SlashCommands(Enum):
     TEST = 'test'
     LEADERBOARD = 'leaderboard'
     JOIN_RANKED_RACE = 'join_ranked_race'
     PROCESS_PLAYERS = 'process_players_wait_list'
-    GET_UNPROCESSED_PLAYERS= 'get_unprocessed_players'
+    GET_UNPROCESSED_PLAYERS = 'get_unprocessed_players'
+
 
 class PlayerStatusEnum(Enum):
     UNPROCESSED = 'unprocessed'
     COMPETING = 'competing'
     NOT_COMPETING = 'not_competing'
     BANNED = 'banned'
+
 
 ONLY_MODS: str = "Only Mods can use this command"
 VALID_SUMMONER_NAME_REGEX: str = "\\w#\\w"

@@ -5,14 +5,14 @@ import re
 import discord
 from discord.ext import commands
 
-from src.actions.data_actions import register_player, get_leaderboard_result, process_waitlist, get_unprocessed_players
+from src.actions.data_actions import get_leaderboard_result, process_waitlist, get_unprocessed_players
 from src.actions.database import get_player_by_summoner_name
 from src.actions.permission import is_mod
 from src.actions.riot_api import get_player_data_call
 from src.resources.constants import REGION_MAP, SlashCommands, ONLY_MODS, VALID_SUMMONER_NAME_REGEX, ServerLocationEnum
 from src.resources.logging_constants import SLASH_COMMANDS, COMMAND_SUCCESS, COMMAND_FAIL, COMMAND_ERROR_UNEXPECTED, \
     COMMAND_ERROR_SUMMONER_NAME, ERROR_EXISTING_SUMMONER, COMMAND_SUCCESS_SUMMONER_REGISTERED, \
-    COMMAND_ERROR_SUMMONER_NOT_FOUND, COMMAND_SUCCESS_PROCESS, PERMISSION_IS_NOT_MOD
+    COMMAND_ERROR_SUMMONER_NOT_FOUND, COMMAND_SUCCESS_PROCESS, PERMISSION_IS_NOT_MOD, COMMAND_ERROR_DISPLAY_NAME_LENGTH
 
 
 async def test(interaction: discord.Interaction):
@@ -51,6 +51,10 @@ async def join_ranked_race(interaction: discord.Interaction, summoner_name: str,
         if not re.search(VALID_SUMMONER_NAME_REGEX, summoner_name):
             await interaction.followup.send(
                 COMMAND_ERROR_SUMMONER_NAME.format(summoner_name),
+                ephemeral=True)
+        elif display_name is not None and (len(display_name) < 3 or len(display_name) > 16):
+            await interaction.followup.send(
+                COMMAND_ERROR_DISPLAY_NAME_LENGTH,
                 ephemeral=True)
         elif get_player_by_summoner_name(summoner_name) is not None:
             await interaction.followup.send(

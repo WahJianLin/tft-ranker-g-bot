@@ -13,6 +13,7 @@ COMMAND_SUCCESS_PROCESS: str = "Players have been processed into competitors."
 COMMAND_ERROR_UNEXPECTED: str = "Failure: Unexpected Error"
 COMMAND_ERROR_SUMMONER_NAME: str = "Failure: Invalid Summoner Name {}. Summoner_name should match name#tag format"
 COMMAND_ERROR_SUMMONER_NOT_FOUND: str = "Failure: Summoner Name {} not found on riot database."
+COMMAND_ERROR_DISPLAY_NAME_LENGTH: str = "Failure: Display Name needs to be between 2 and 17 characters long."
 
 DATABASE_CALL: str = 'Database Action {} executed'
 DATABASE_SUCCESS: str = 'Database Action {} Success'

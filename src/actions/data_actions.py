@@ -108,7 +108,7 @@ def gen_ranked_leaderboard_text(leaderboard_entries: list[LeaderboardEntry]) -> 
             last_rank_val = entry.tft_rank_value
             rank_pos += 1
         player_name_rank: str = f'{rank_pos}) {entry.display_name}'
-        player_name_rank = format_str_spacing_util(player_name_rank,25)
+        player_name_rank = format_str_spacing_util(player_name_rank, 25)
         entry_detail: str = f'{player_name_rank}{entry.tft_rank_title}\n'
         leaderboard_str += entry_detail
     leaderboard_str += '-' * 80

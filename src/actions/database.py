@@ -45,9 +45,9 @@ def get_players(status: PlayerStatusEnum = PlayerStatusEnum.UNPROCESSED) -> list
         records: list[tuple[any, ...]] = db_cursor.fetchall()
 
         for player_tpl in records:
-            player: Player = Player.constructor(player_tpl[0], player_tpl[1], player_tpl[2], player_tpl[3],
-                                                player_tpl[4], player_tpl[5], player_tpl[6], player_tpl[7],
-                                                player_tpl[8])
+            player: Player = Player(player_tpl[0], player_tpl[1], player_tpl[2], player_tpl[3],
+                                    player_tpl[4], player_tpl[5], player_tpl[6], player_tpl[7],
+                                    player_tpl[8], player_tpl[9])
             player_list.append(player)
 
         db_cursor.close()
@@ -78,8 +78,8 @@ def get_player_by_summoner_name(summoner_name: str) -> Player | None:
             logging.info(DATABASE_SUCCESS.format(DB_CALL_GET_PLAYER_BY_NAME))
             return None
 
-        player: Player = Player.constructor(record[0], record[1], record[2], record[3], record[4], record[5], record[6],
-                                            record[7], record[8])
+        player: Player = Player(record[0], record[1], record[2], record[3], record[4], record[5], record[6],
+                                record[7], record[8], record[9])
 
         logging.info(DATABASE_SUCCESS.format(DB_CALL_GET_PLAYER_BY_NAME))
         return player
@@ -137,8 +137,8 @@ def get_competitors_by_status() -> list[CompetitorV] | None:
         db_cursor.execute(query, [PlayerStatusEnum.COMPETING.value])
         records: list[tuple[any, ...]] = db_cursor.fetchall()
         for comp_tpl in records:
-            competitor: CompetitorV = CompetitorV.constructor(comp_tpl[0], comp_tpl[1], comp_tpl[2],
-                                                              PlayerStatusEnum(comp_tpl[3]), comp_tpl[4])
+            competitor: CompetitorV = CompetitorV(comp_tpl[0], comp_tpl[1], comp_tpl[2],
+                                                  PlayerStatusEnum(comp_tpl[3]), comp_tpl[4])
             competitor_list.append(competitor)
         db_cursor.close()
         conn.close()
@@ -162,8 +162,8 @@ def get_competitor_by_summoner_name(player_id: int) -> Player | None:
         db_cursor.execute(query, [player_id])
         record: tuple[any, ...] = db_cursor.fetchone()
 
-        player: Player = Player.constructor(record[0], record[1], record[2], record[3], record[4], record[5], record[6],
-                                            record[7], record[8])
+        player: Player = Player(record[0], record[1], record[2], record[3], record[4], record[5], record[6],
+                                record[7], record[8], record[9])
 
         db_cursor.close()
         conn.close()
@@ -193,8 +193,8 @@ def get_player_riot_data_by_id(player_id: int) -> Player | None:
             logging.info(DATABASE_SUCCESS.format(DB_CALL_GET_VALID_COMPETITOR_BY_NAME))
             return None
 
-        player: Player = Player.constructor(record[0], record[1], record[2], record[3], record[4], record[5], record[6],
-                                            record[7], record[8])
+        player: Player = Player(record[0], record[1], record[2], record[3], record[4], record[5], record[6],
+                                record[7], record[8], record[9])
         logging.info(DATABASE_SUCCESS.format(DB_CALL_GET_VALID_COMPETITOR_BY_NAME))
         return player
     except Exception as e:
@@ -217,8 +217,8 @@ def get_player_riot_data_by_ids(player_ids: list[int]) -> list[PlayerRiotData] |
         records: list[tuple[any, ...]] = db_cursor.fetchall()
 
         for player_data_tpl in records:
-            player_data: PlayerRiotData = PlayerRiotData.constructor(player_data_tpl[0], player_data_tpl[1],
-                                                                     player_data_tpl[2])
+            player_data: PlayerRiotData = PlayerRiotData(player_data_tpl[0], player_data_tpl[1],
+                                                         player_data_tpl[2])
             player_riot_data_list.append(player_data)
 
         db_cursor.close()
