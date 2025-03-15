@@ -6,7 +6,7 @@ from src.actions.database import insert_player, get_players, insert_player_riot_
 from src.actions.riot_api import get_ranks, get_summoner_id_call, get_player_data_call
 from src.actions.util import format_str_spacing_util
 from src.resources.constants import REGION_MAP, SERVER_NAME_MAP, LEADER_BOARD_TITLE, ServerLocationEnum, \
-    UNPROCESSED_PLAYERS_TITLE, PlayerStatusEnum
+    LIST_PLAYERS_TITLE, PlayerStatusEnum
 from src.resources.entity import Player, PlayerDataRes, LeaderboardEntry, PlayerRiotData
 
 
@@ -15,6 +15,7 @@ def register_player(
         summoner_name: str,
         location: ServerLocationEnum,
         display_name: str | None,
+        discord_id: int,
         is_streamer: bool = False
 ) -> None:
     display_name_to_save: str = display_name if display_name is not None else summoner_name.split("#")[0]
@@ -22,14 +23,14 @@ def register_player(
     processed_date: date | None = None
 
     player: Player = Player(None, summoner_name, display_name_to_save, REGION_MAP[location], SERVER_NAME_MAP[location],
-                            join_date, processed_date, is_streamer, PlayerStatusEnum.UNPROCESSED.value)
+                            join_date, processed_date, is_streamer, PlayerStatusEnum.UNPROCESSED.value, discord_id)
     insert_player(player)
 
 
 # get list of unprocessed players
-def get_unprocessed_players() -> str:
-    player_list: list[Player] = get_players()
-    unprocessed_players_str: str = UNPROCESSED_PLAYERS_TITLE + '\n'
+def get_player_by_status(status: PlayerStatusEnum) -> str:
+    player_list: list[Player] = get_players(status)
+    unprocessed_players_str: str = LIST_PLAYERS_TITLE.format(status.value) + '\n'
     unprocessed_players_str += '-' * 120 + '\n'
     space_in_between: int = 50
     for player in player_list:
@@ -107,7 +108,7 @@ def gen_ranked_leaderboard_text(leaderboard_entries: list[LeaderboardEntry]) -> 
             last_rank_val = entry.tft_rank_value
             rank_pos += 1
         player_name_rank: str = f'{rank_pos}) {entry.display_name}'
-        player_name_rank = format_str_spacing_util(player_name_rank,25)
+        player_name_rank = format_str_spacing_util(player_name_rank, 25)
         entry_detail: str = f'{player_name_rank}{entry.tft_rank_title}\n'
         leaderboard_str += entry_detail
     leaderboard_str += '-' * 80
