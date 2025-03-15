@@ -6,7 +6,7 @@ from src.actions.database import insert_player, get_players, insert_player_riot_
 from src.actions.riot_api import get_ranks, get_summoner_id_call, get_player_data_call
 from src.actions.util import format_str_spacing_util
 from src.resources.constants import REGION_MAP, SERVER_NAME_MAP, LEADER_BOARD_TITLE, ServerLocationEnum, \
-    UNPROCESSED_PLAYERS_TITLE, PlayerStatusEnum
+    LIST_PLAYERS_TITLE, PlayerStatusEnum
 from src.resources.entity import Player, PlayerDataRes, LeaderboardEntry, PlayerRiotData
 
 
@@ -30,7 +30,7 @@ def register_player(
 # get list of unprocessed players
 def get_player_by_status(status: PlayerStatusEnum) -> str:
     player_list: list[Player] = get_players(status)
-    unprocessed_players_str: str = UNPROCESSED_PLAYERS_TITLE.format(status.value) + '\n'
+    unprocessed_players_str: str = LIST_PLAYERS_TITLE.format(status.value) + '\n'
     unprocessed_players_str += '-' * 120 + '\n'
     space_in_between: int = 50
     for player in player_list:
