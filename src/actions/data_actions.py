@@ -1,12 +1,13 @@
 import logging
 from datetime import date, datetime
 
-from src.actions.database import insert_player, get_players, insert_player_riot_data, \
-    get_player_riot_data_by_ids, update_player_processed, get_player_riot_data_by_id
+from src.actions.database import insert_player, get_players_by_status, insert_player_riot_data, \
+    get_player_riot_data_by_ids, db_update_player_status, get_player_riot_data_by_id, get_player_by_summoner_name, \
+    update_player_processed
 from src.actions.riot_api import get_ranks, get_summoner_id_call, get_player_data_call
 from src.actions.util import format_str_spacing_util
 from src.resources.constants import REGION_MAP, SERVER_NAME_MAP, LEADER_BOARD_TITLE, ServerLocationEnum, \
-    LIST_PLAYERS_TITLE, PlayerStatusEnum
+    LIST_PLAYERS_TITLE, PlayerStatusEnum, ParticipationResponseEnum
 from src.resources.entity import Player, PlayerDataRes, LeaderboardEntry, PlayerRiotData
 
 
@@ -29,7 +30,7 @@ def register_player(
 
 # get list of unprocessed players
 def get_player_by_status(status: PlayerStatusEnum) -> str:
-    player_list: list[Player] = get_players(status)
+    player_list: list[Player] = get_players_by_status(status)
     unprocessed_players_str: str = LIST_PLAYERS_TITLE.format(status.value) + '\n'
     unprocessed_players_str += '-' * 120 + '\n'
     space_in_between: int = 50
@@ -49,7 +50,7 @@ def get_player_by_status(status: PlayerStatusEnum) -> str:
 
 # processing waitlist
 def process_waitlist() -> None:
-    player_list: list[Player] = get_players()
+    player_list: list[Player] = get_players_by_status()
     summoner_data_tpl: list[tuple[int, str]] = []
     player_ids: list[int] = []
 
@@ -119,3 +120,19 @@ def get_leaderboard_result() -> str:
     leaderboard_entries: list[LeaderboardEntry] = get_ranks()
     sort_leaderboard(leaderboard_entries)
     return gen_ranked_leaderboard_text(leaderboard_entries)
+
+
+def update_participation(summoner_name: str, participation: bool) -> str:
+    player: Player | None = get_player_by_summoner_name(summoner_name)
+    print(player)
+    if player is not None:
+        if player.player_status == PlayerStatusEnum.BANNED.value:
+            return ParticipationResponseEnum.BANNED
+        elif player.player_status == PlayerStatusEnum.UNPROCESSED.value:
+            return ParticipationResponseEnum.UNPROCESSED
+        else:
+            status: PlayerStatusEnum = PlayerStatusEnum.COMPETING if participation else PlayerStatusEnum.NOT_COMPETING
+            db_update_player_status(player.id, status)
+            return ParticipationResponseEnum.SUCCESS
+
+    return ParticipationResponseEnum.SUCCESS

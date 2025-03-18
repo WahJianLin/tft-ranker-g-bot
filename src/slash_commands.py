@@ -5,7 +5,8 @@ import re
 import discord
 from discord.ext import commands
 
-from src.actions.data_actions import get_leaderboard_result, process_waitlist, get_player_by_status, register_player
+from src.actions.data_actions import get_leaderboard_result, process_waitlist, get_player_by_status, register_player, \
+    update_participation
 from src.actions.database import get_player_by_summoner_name
 from src.actions.permission import is_mod
 from src.actions.riot_api import get_player_data_call
@@ -105,7 +106,7 @@ async def process_registered_players_command(interaction: discord.Interaction):
 
 async def get_players_by_status_command(interaction: discord.Interaction, status: PlayerStatusEnum):
     try:
-        logging.info(SLASH_COMMANDS.format(SlashCommands.GET_UNPROCESSED_PLAYERS.value))
+        logging.info(SLASH_COMMANDS.format(SlashCommands.GET_PLAYER_STATUS.value))
         if is_mod(interaction.user.roles):
             await interaction.response.defer()
             await asyncio.sleep(10)
@@ -114,6 +115,22 @@ async def get_players_by_status_command(interaction: discord.Interaction, status
             logging.info(SLASH_COMMANDS.format(COMMAND_SUCCESS))
         else:
             await interaction.response.send_message(ONLY_MODS, ephemeral=True)
+    except Exception as e:
+        logging.info(SLASH_COMMANDS.format(COMMAND_FAIL))
+        logging.exception(e)
+        await interaction.response.send_message(COMMAND_ERROR_UNEXPECTED,
+                                                ephemeral=True)
+
+
+#used word participation instead of competition since it sounds a bit better
+async def update_participation_command(interaction: discord.Interaction, summoner_name: str, participation: bool):
+    try:
+        logging.info(SLASH_COMMANDS.format(SlashCommands.UPDATE_PARTICIPATION.value))
+        await interaction.response.defer()
+        await asyncio.sleep(10)
+
+        await interaction.followup.send(update_participation(summoner_name, participation), ephemeral=True)
+        logging.info(SLASH_COMMANDS.format(COMMAND_SUCCESS))
     except Exception as e:
         logging.info(SLASH_COMMANDS.format(COMMAND_FAIL))
         logging.exception(e)
@@ -133,3 +150,6 @@ def setup(client: commands.Bot):
     client.tree.add_command(
         discord.app_commands.Command(name='get_unprocessed_players', callback=get_players_by_status_command,
                                      description='Mod can see players to register'))
+    client.tree.add_command(
+        discord.app_commands.Command(name='player_participation', callback=update_participation_command,
+                                     description='Player can determine participation'))

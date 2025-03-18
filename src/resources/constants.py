@@ -88,7 +88,8 @@ LEAGUE_POINTS: str = 'leaguePoints'
 TFT_RANK_VALUE: str = 'tft_rank_value'
 TFT_RANK_TITLE: str = 'tft_rank_title'
 QUEUE_TYPE: str = 'queueType'
-SUMMONER_NAME: str = 'summoner_name'
+SUMMONER_NAME: str \
+    = 'summoner_name'
 DISPLAY_NAME: str = 'display_name'
 
 LEADER_BOARD_TITLE: str = 'Leaderboard rank: '
@@ -100,7 +101,8 @@ class SlashCommands(Enum):
     LEADERBOARD = 'leaderboard'
     JOIN_RANKED_RACE = 'join_ranked_race'
     PROCESS_PLAYERS = 'process_players_wait_list'
-    GET_UNPROCESSED_PLAYERS = 'get_unprocessed_players'
+    GET_PLAYER_STATUS = 'get_player_status'
+    UPDATE_PARTICIPATION = 'update_participation_command'
 
 
 class PlayerStatusEnum(Enum):
@@ -112,3 +114,10 @@ class PlayerStatusEnum(Enum):
 
 ONLY_MODS: str = "Only Mods can use this command"
 VALID_SUMMONER_NAME_REGEX: str = "\\w#\\w"
+
+
+class ParticipationResponseEnum:
+    UNPROCESSED = 'Summoner account is on waitlist'
+    BANNED = 'Summoner account is banned'
+    SUCCESS = 'Summoner account participation updated'
+    NO_PLAYER = 'Summoner account needs to be registered'
