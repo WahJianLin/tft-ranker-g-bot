@@ -14,8 +14,9 @@ RUN_TIMES_STR: list[str] = os.getenv('SCHEDULE_LEADERBOARD_TIMES').split(",")
 RUN_TIMES: list[int] = list(map(int, RUN_TIMES_STR))
 
 
-@tasks.loop(minutes=10)
+@tasks.loop(minutes=60)
 async def schedule_leaderboard_caller(client):
+
     cur_hour: int = datetime.now().hour
     message_channel = client.get_channel(LEADERBOARD_CHANNEL)
 

@@ -10,7 +10,7 @@ class RiotTiersEnum(Enum):
     EMERALD = 600000000
     DIAMOND = 700000000
     MASTER = 800000000
-    GRAND_MASTER = 900000000
+    GRANDMASTER = 900000000
     CHALLENGER = 1000000000
 
 
@@ -92,12 +92,23 @@ SUMMONER_NAME: str = 'summoner_name'
 DISPLAY_NAME: str = 'display_name'
 
 LEADER_BOARD_TITLE: str = 'Leaderboard rank: '
+LIST_PLAYERS_TITLE: str = 'List of {} players'
+
 
 class SlashCommands(Enum):
     TEST = 'test'
     LEADERBOARD = 'leaderboard'
     JOIN_RANKED_RACE = 'join_ranked_race'
     PROCESS_PLAYERS = 'process_players_wait_list'
+    GET_UNPROCESSED_PLAYERS = 'get_unprocessed_players'
+
+
+class PlayerStatusEnum(Enum):
+    UNPROCESSED = 'unprocessed'
+    COMPETING = 'competing'
+    NOT_COMPETING = 'not_competing'
+    BANNED = 'banned'
+
 
 ONLY_MODS: str = "Only Mods can use this command"
 VALID_SUMMONER_NAME_REGEX: str = "\\w#\\w"
