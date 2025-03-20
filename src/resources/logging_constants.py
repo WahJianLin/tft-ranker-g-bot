@@ -7,7 +7,7 @@ SLASH_COMMANDS: str = 'Slash Command {} executed'
 COMMAND_SUCCESS: str = 'Command Success'
 COMMAND_FAIL: str = 'Command Failure'
 
-COMMAND_SUCCESS_SUMMONER_REGISTERED: str = "Success: {} Registered. Please wait until this Saturday to be officially added into the race"
+COMMAND_SUCCESS_SUMMONER_REGISTERED: str = "Registration Success. Please wait until mod reviews registration"
 COMMAND_SUCCESS_PROCESS: str = "Players have been processed into competitors."
 
 COMMAND_ERROR_UNEXPECTED: str = "Failure: Unexpected Error"

@@ -7,7 +7,7 @@ from src.actions.database import insert_player, get_players_by_status, insert_pl
 from src.actions.riot_api import get_ranks, get_summoner_id_call, get_player_data_call
 from src.actions.util import format_str_spacing_util
 from src.resources.constants import REGION_MAP, SERVER_NAME_MAP, LEADER_BOARD_TITLE, ServerLocationEnum, \
-    LIST_PLAYERS_TITLE, PlayerStatusEnum, ParticipationResponseEnum
+    LIST_PLAYERS_TITLE, PlayerStatusEnum, ParticipationResponseEnum, PLAYER_HELP, MOD_HELP
 from src.resources.entity import Player, PlayerDataRes, LeaderboardEntry, PlayerRiotData
 
 
@@ -23,7 +23,7 @@ def register_player(
     join_date: date = date.today()
     processed_date: date | None = None
 
-    player: Player = Player(None, summoner_name, display_name_to_save, REGION_MAP[location], SERVER_NAME_MAP[location],
+    player: Player = Player(None, summoner_name.lower(), display_name_to_save, REGION_MAP[location], SERVER_NAME_MAP[location],
                             join_date, processed_date, is_streamer, PlayerStatusEnum.UNPROCESSED.value, discord_id)
     insert_player(player)
 
@@ -122,17 +122,26 @@ def get_leaderboard_result() -> str:
     return gen_ranked_leaderboard_text(leaderboard_entries)
 
 
-def update_participation(summoner_name: str, participation: bool) -> str:
+def update_participation(summoner_name: str, participation: bool, discord_id: int) -> str:
     player: Player | None = get_player_by_summoner_name(summoner_name)
-    print(player)
+    print(summoner_name, player)
     if player is not None:
         if player.player_status == PlayerStatusEnum.BANNED.value:
             return ParticipationResponseEnum.BANNED
         elif player.player_status == PlayerStatusEnum.UNPROCESSED.value:
             return ParticipationResponseEnum.UNPROCESSED
+        elif player.discord_id != discord_id:
+            return ParticipationResponseEnum.NOT_CORRECT_DISCORD_ID
         else:
             status: PlayerStatusEnum = PlayerStatusEnum.COMPETING if participation else PlayerStatusEnum.NOT_COMPETING
             db_update_player_status(player.id, status)
             return ParticipationResponseEnum.SUCCESS
 
-    return ParticipationResponseEnum.SUCCESS
+    return ParticipationResponseEnum.NO_PLAYER
+
+
+def generate_help_text(is_mod: bool) -> str:
+    help_text: str = PLAYER_HELP
+    if is_mod:
+        help_text += MOD_HELP
+    return help_text

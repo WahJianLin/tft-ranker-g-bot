@@ -103,6 +103,7 @@ class SlashCommands(Enum):
     PROCESS_PLAYERS = 'process_players_wait_list'
     GET_PLAYER_STATUS = 'get_player_status'
     UPDATE_PARTICIPATION = 'update_participation_command'
+    HELP = 'help'
 
 
 class PlayerStatusEnum(Enum):
@@ -117,7 +118,44 @@ VALID_SUMMONER_NAME_REGEX: str = "\\w#\\w"
 
 
 class ParticipationResponseEnum:
-    UNPROCESSED = 'Summoner account is on waitlist'
-    BANNED = 'Summoner account is banned'
-    SUCCESS = 'Summoner account participation updated'
-    NO_PLAYER = 'Summoner account needs to be registered'
+    SUCCESS = 'Success: Summoner account participation updated'
+    UNPROCESSED = 'Failure: Summoner account is on waitlist'
+    BANNED = 'Failure: Summoner account is banned'
+    NO_PLAYER = 'Failure: Summoner account needs to be registered'
+    NOT_CORRECT_DISCORD_ID = 'Failure: Summoner account was registered by a different discord user'
+
+class CommandNameEnum:
+    MOD_LEADERBOARD= 'mod_leaderboard'
+    MOD_PROCESS_WAIT_LIST= 'mod_process_players_wait_list'
+    MOD_PLAYERS_BY_STATUS = 'mod_get_players_by_status'
+    REGISTER_FOR_RACE= 'join_ranked_race'
+    PLAYER_PARTICIPATION= 'player_participation'
+    HELP = 'help'
+
+class CommandDescriptionEnum:
+    MOD_LEADERBOARD= 'Generate current leaderboard'
+    MOD_PROCESS_WAIT_LIST='Process waitlist of players and let players into race'
+    MOD_PLAYERS_BY_STATUS = 'Grabs list of players based on status'
+    REGISTER_FOR_RACE= 'Register for ranked racing using your summoner name (EX: Player#123) and server (EX: NA)'
+    PLAYER_PARTICIPATION= 'Allows Players to update their participation status in race'
+    HELP = 'Shows all commands'
+
+MOD_HELP: str = f"""
+Mod Commands:
+{"-" * 30}
+{CommandNameEnum.MOD_LEADERBOARD}: {CommandDescriptionEnum.MOD_LEADERBOARD}
+{CommandNameEnum.MOD_PROCESS_WAIT_LIST}: {CommandDescriptionEnum.MOD_PROCESS_WAIT_LIST}
+{CommandNameEnum.MOD_PLAYERS_BY_STATUS}: {CommandDescriptionEnum.MOD_PLAYERS_BY_STATUS}
+{"-" * 30}
+"""
+
+PLAYER_HELP: str = f"""
+->
+\n
+Player Commands
+{"-" * 30}
+{CommandNameEnum.REGISTER_FOR_RACE}: {CommandDescriptionEnum.REGISTER_FOR_RACE}
+{CommandNameEnum.PLAYER_PARTICIPATION}: {CommandDescriptionEnum.PLAYER_PARTICIPATION}
+{"-" * 30}
+
+"""

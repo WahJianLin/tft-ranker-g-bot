@@ -15,19 +15,19 @@ from src.resources.logging_constants import DATABASE_CALL, DB_CALL_GET_ALL_VALID
 
 load_dotenv()
 
-SCHEMA: str = 'public'
+SCHEMA: str = os.getenv('DATABASE_SCHEMA')
 
-PLAYER_TABLE: str = 'players_dev'
-RIOT_DATA_TABLE: str = 'riot_data_dev'
+PLAYER_TABLE: str = 'players'
+RIOT_DATA_TABLE: str = 'riot_data'
 COMPETITOR_VIEW: str = 'competitor_v'
 
 
 def db_base_connect() -> connection:
     return psycopg2.connect(
-        database=os.getenv('DATA_BASE_NAME'),
-        user=os.getenv('DATA_BASE_USER'),
-        password=os.getenv('DATA_BASE_PASS'),
-        host=os.getenv('DATA_BASE_HOST'),
+        database=os.getenv('DATABASE_NAME'),
+        user=os.getenv('DATABASE_USER'),
+        password=os.getenv('DATABASE_PASS'),
+        host=os.getenv('DATABASE_HOST'),
         port=int(os.getenv('DATABASE_PORT'))
     )
 
