@@ -82,6 +82,8 @@ def get_rank_data(competitor: CompetitorV) -> LeaderboardEntry | None:
                     if body[body_len - 1][QUEUE_TYPE] == RANKED_QUEUE_TYPE:
                         rank_data = body[body_len - 1]
                     body_len -= 1
+                if len(rank_data) == 0:
+                    return None
                 tier: str = rank_data[TIER]  # gets metal rank like iron or bronze
                 rank: str = rank_data[RANK]  # gets rank subdivision
                 points: int = rank_data[LEAGUE_POINTS]  # gets lp value
