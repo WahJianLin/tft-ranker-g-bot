@@ -88,7 +88,8 @@ LEAGUE_POINTS: str = 'leaguePoints'
 TFT_RANK_VALUE: str = 'tft_rank_value'
 TFT_RANK_TITLE: str = 'tft_rank_title'
 QUEUE_TYPE: str = 'queueType'
-SUMMONER_NAME: str = 'summoner_name'
+SUMMONER_NAME: str \
+    = 'summoner_name'
 DISPLAY_NAME: str = 'display_name'
 
 LEADER_BOARD_TITLE: str = 'Leaderboard rank: '
@@ -100,7 +101,9 @@ class SlashCommands(Enum):
     LEADERBOARD = 'leaderboard'
     JOIN_RANKED_RACE = 'join_ranked_race'
     PROCESS_PLAYERS = 'process_players_wait_list'
-    GET_UNPROCESSED_PLAYERS = 'get_unprocessed_players'
+    GET_PLAYER_STATUS = 'get_player_status'
+    UPDATE_PARTICIPATION = 'update_participation_command'
+    HELP = 'help'
 
 
 class PlayerStatusEnum(Enum):
@@ -112,3 +115,47 @@ class PlayerStatusEnum(Enum):
 
 ONLY_MODS: str = "Only Mods can use this command"
 VALID_SUMMONER_NAME_REGEX: str = "\\w#\\w"
+
+
+class ParticipationResponseEnum:
+    SUCCESS = 'Success: Summoner account participation updated'
+    UNPROCESSED = 'Failure: Summoner account is on waitlist'
+    BANNED = 'Failure: Summoner account is banned'
+    NO_PLAYER = 'Failure: Summoner account needs to be registered'
+    NOT_CORRECT_DISCORD_ID = 'Failure: Summoner account was registered by a different discord user'
+
+class CommandNameEnum:
+    MOD_LEADERBOARD= 'mod_leaderboard'
+    MOD_PROCESS_WAIT_LIST= 'mod_process_players_wait_list'
+    MOD_PLAYERS_BY_STATUS = 'mod_get_players_by_status'
+    REGISTER_FOR_RACE= 'join_ranked_race'
+    PLAYER_PARTICIPATION= 'player_participation'
+    HELP = 'help'
+
+class CommandDescriptionEnum:
+    MOD_LEADERBOARD= 'Generate current leaderboard'
+    MOD_PROCESS_WAIT_LIST='Process waitlist of players and let players into race'
+    MOD_PLAYERS_BY_STATUS = 'Grabs list of players based on status'
+    REGISTER_FOR_RACE= 'Register for ranked racing using your summoner name (EX: Player#123) and server (EX: NA)'
+    PLAYER_PARTICIPATION= 'Allows Players to update their participation status in race'
+    HELP = 'Shows all commands'
+
+MOD_HELP: str = f"""
+Mod Commands:
+{"-" * 30}
+{CommandNameEnum.MOD_LEADERBOARD}: {CommandDescriptionEnum.MOD_LEADERBOARD}
+{CommandNameEnum.MOD_PROCESS_WAIT_LIST}: {CommandDescriptionEnum.MOD_PROCESS_WAIT_LIST}
+{CommandNameEnum.MOD_PLAYERS_BY_STATUS}: {CommandDescriptionEnum.MOD_PLAYERS_BY_STATUS}
+{"-" * 30}
+"""
+
+PLAYER_HELP: str = f"""
+->
+\n
+Player Commands
+{"-" * 30}
+{CommandNameEnum.REGISTER_FOR_RACE}: {CommandDescriptionEnum.REGISTER_FOR_RACE}
+{CommandNameEnum.PLAYER_PARTICIPATION}: {CommandDescriptionEnum.PLAYER_PARTICIPATION}
+{"-" * 30}
+
+"""

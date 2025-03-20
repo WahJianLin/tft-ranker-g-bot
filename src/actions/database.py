@@ -11,28 +11,28 @@ from src.resources.entity import Player, CompetitorV, PlayerRiotData
 from src.resources.logging_constants import DATABASE_CALL, DB_CALL_GET_ALL_VALID_COMPETITOR, DATABASE_SUCCESS, \
     DATABASE_FAIL, DB_CALL_GET_VALID_COMPETITOR_BY_NAME, DB_CALL_GET_VALID_COMPETITORS_BY_NAMES, \
     DB_CALL_UPDATE_PLAYERS_PROCESSED, DB_CALL_INSERT_COMPETITOR, ERROR_EXISTING_SUMMONER, DB_CALL_INSERT_PLAYER, \
-    DB_CALL_GET_PLAYER_BY_NAME, DB_CALL_GET_PLAYERS
+    DB_CALL_GET_PLAYER_BY_NAME, DB_CALL_GET_PLAYERS, DB_CALL_UPDATE_PLAYER_STATUS, DB_CALL_GET_RIOT_DATA_BY_ID
 
 load_dotenv()
 
-SCHEMA: str = 'public'
+SCHEMA: str = os.getenv('DATABASE_SCHEMA')
 
-PLAYER_TABLE: str = 'players_dev'
-RIOT_DATA_TABLE: str = 'riot_data_dev'
+PLAYER_TABLE: str = 'players'
+RIOT_DATA_TABLE: str = 'riot_data'
 COMPETITOR_VIEW: str = 'competitor_v'
 
 
 def db_base_connect() -> connection:
     return psycopg2.connect(
-        database=os.getenv('DATA_BASE_NAME'),
-        user=os.getenv('DATA_BASE_USER'),
-        password=os.getenv('DATA_BASE_PASS'),
-        host=os.getenv('DATA_BASE_HOST'),
+        database=os.getenv('DATABASE_NAME'),
+        user=os.getenv('DATABASE_USER'),
+        password=os.getenv('DATABASE_PASS'),
+        host=os.getenv('DATABASE_HOST'),
         port=int(os.getenv('DATABASE_PORT'))
     )
 
 
-def get_players(status: PlayerStatusEnum = PlayerStatusEnum.UNPROCESSED) -> list[Player]:
+def get_players_by_status(status: PlayerStatusEnum = PlayerStatusEnum.UNPROCESSED) -> list[Player]:
     try:
         logging.info(DATABASE_CALL.format(DB_CALL_GET_PLAYERS))
         conn: connection = db_base_connect()
@@ -95,6 +95,7 @@ def insert_player(player: Player) -> None:
         if get_player_by_summoner_name(player.summoner_name) is None:
             conn: connection = db_base_connect()
             db_cursor: cursor = conn.cursor()
+            query: str = f"INSERT INTO {SCHEMA}.{PLAYER_TABLE}(summoner_name, display_name, region, riot_server, join_date, processed_date, is_streamer, player_status, discord_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
             values: tuple[str, str, str, str, datetime, datetime, bool, PlayerStatusEnum, int] = (
                 player.summoner_name,
                 player.display_name,
@@ -106,11 +107,7 @@ def insert_player(player: Player) -> None:
                 player.player_status,
                 player.discord_id
             )
-            db_cursor.execute(
-                f"INSERT INTO {SCHEMA}.{PLAYER_TABLE}(summoner_name, display_name, region, riot_server, join_date, "
-                "processed_date, is_streamer, player_status, discord_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                values
-            )
+            db_cursor.execute(query, values)
             conn.commit()
             db_cursor.close()
             conn.close()
@@ -176,9 +173,9 @@ def get_competitor_by_summoner_name(player_id: int) -> Player | None:
         raise Exception(format(e)) from None
 
 
-def get_player_riot_data_by_id(player_id: int) -> Player | None:
+def get_player_riot_data_by_id(player_id: int) -> PlayerRiotData | None:
     try:
-        logging.info(DATABASE_CALL.format(DB_CALL_GET_VALID_COMPETITOR_BY_NAME))
+        logging.info(DATABASE_CALL.format(DB_CALL_GET_RIOT_DATA_BY_ID))
         conn: connection = db_base_connect()
         db_cursor: cursor = conn.cursor()
 
@@ -190,15 +187,14 @@ def get_player_riot_data_by_id(player_id: int) -> Player | None:
         conn.close()
 
         if record is None:
-            logging.info(DATABASE_SUCCESS.format(DB_CALL_GET_VALID_COMPETITOR_BY_NAME))
+            logging.info(DATABASE_SUCCESS.format(DB_CALL_GET_RIOT_DATA_BY_ID))
             return None
 
-        player: Player = Player(record[0], record[1], record[2], record[3], record[4], record[5], record[6],
-                                record[7], record[8], record[9])
-        logging.info(DATABASE_SUCCESS.format(DB_CALL_GET_VALID_COMPETITOR_BY_NAME))
-        return player
+        player_riot_data: PlayerRiotData = PlayerRiotData(record[0], record[1], record[2])
+        logging.info(DATABASE_SUCCESS.format(DB_CALL_GET_RIOT_DATA_BY_ID))
+        return player_riot_data
     except Exception as e:
-        logging.info(DATABASE_FAIL.format(DB_CALL_GET_VALID_COMPETITOR_BY_NAME))
+        logging.info(DATABASE_FAIL.format(DB_CALL_GET_RIOT_DATA_BY_ID))
         logging.exception(e)
         raise Exception(format(e)) from None
 
@@ -301,5 +297,27 @@ def insert_player_riot_data(competitors_list: list[tuple[int, str]]) -> None:
         logging.info(DATABASE_SUCCESS.format(DB_CALL_INSERT_COMPETITOR))
     except Exception as e:
         logging.info(DATABASE_FAIL.format(DB_CALL_INSERT_COMPETITOR))
+        logging.exception(e)
+        raise Exception(format(e)) from None
+
+
+def db_update_player_status(player_id: int, status: PlayerStatusEnum) -> None:
+    try:
+        logging.info(DATABASE_CALL.format(DB_CALL_UPDATE_PLAYER_STATUS))
+        conn: connection = db_base_connect()
+        db_cursor: cursor = conn.cursor()
+
+        query: str = f"UPDATE {SCHEMA}.{PLAYER_TABLE} SET player_status = %s WHERE id = %s"
+        values: tuple[str, int] = (status.value, player_id)
+
+        db_cursor.execute(query, values)
+
+        conn.commit()
+        db_cursor.close()
+        conn.close()
+
+        logging.info(DATABASE_SUCCESS.format(DB_CALL_UPDATE_PLAYER_STATUS))
+    except Exception as e:
+        logging.info(DATABASE_FAIL.format(DB_CALL_UPDATE_PLAYER_STATUS))
         logging.exception(e)
         raise Exception(format(e)) from None

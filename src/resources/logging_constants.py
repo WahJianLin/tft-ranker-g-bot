@@ -7,7 +7,7 @@ SLASH_COMMANDS: str = 'Slash Command {} executed'
 COMMAND_SUCCESS: str = 'Command Success'
 COMMAND_FAIL: str = 'Command Failure'
 
-COMMAND_SUCCESS_SUMMONER_REGISTERED: str = "Success: {} Registered. Please wait until this Saturday to be officially added into the race"
+COMMAND_SUCCESS_SUMMONER_REGISTERED: str = "Registration Success. Please wait until mod reviews registration"
 COMMAND_SUCCESS_PROCESS: str = "Players have been processed into competitors."
 
 COMMAND_ERROR_UNEXPECTED: str = "Failure: Unexpected Error"
@@ -23,9 +23,12 @@ DB_CALL_GET_PLAYERS: str = 'get_players'
 DB_CALL_GET_PLAYER_BY_NAME: str = 'get_player_by_summoner_name'
 DB_CALL_GET_ALL_VALID_COMPETITOR: str = 'get_valid_competitor'
 DB_CALL_GET_VALID_COMPETITOR_BY_NAME: str = 'get_competitor_by_summoner_name'
+DB_CALL_GET_RIOT_DATA_BY_ID: str = 'get_player_riot_data_by_id'
 DB_CALL_GET_VALID_COMPETITORS_BY_NAMES: str = 'get_competitors_by_summoner_names'
 
 DB_CALL_UPDATE_PLAYERS_PROCESSED: str = 'update_player_processed'
+DB_CALL_UPDATE_PLAYER_STATUS: str = 'update_player_status'
+
 
 DB_CALL_INSERT_PLAYER: str = 'insert_player'
 DB_CALL_INSERT_COMPETITOR: str = 'insert_competitor'
