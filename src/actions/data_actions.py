@@ -23,7 +23,7 @@ def register_player(
     join_date: date = date.today()
     processed_date: date | None = None
 
-    player: Player = Player(None, summoner_name, display_name_to_save, REGION_MAP[location], SERVER_NAME_MAP[location],
+    player: Player = Player(None, summoner_name.lower(), display_name_to_save, REGION_MAP[location], SERVER_NAME_MAP[location],
                             join_date, processed_date, is_streamer, PlayerStatusEnum.UNPROCESSED.value, discord_id)
     insert_player(player)
 
@@ -124,19 +124,25 @@ def get_leaderboard_result() -> str:
 
 def update_participation(summoner_name: str, participation: bool, discord_id: int) -> str:
     player: Player | None = get_player_by_summoner_name(summoner_name)
+    print(summoner_name, player)
     if player is not None:
+        print('p1')
         if player.player_status == PlayerStatusEnum.BANNED.value:
+            print('banned')
             return ParticipationResponseEnum.BANNED
         elif player.player_status == PlayerStatusEnum.UNPROCESSED.value:
+            print('unprocessed')
             return ParticipationResponseEnum.UNPROCESSED
         elif player.discord_id != discord_id:
+            print('other user')
             return ParticipationResponseEnum.NOT_CORRECT_DISCORD_ID
         else:
+            print('success')
             status: PlayerStatusEnum = PlayerStatusEnum.COMPETING if participation else PlayerStatusEnum.NOT_COMPETING
             db_update_player_status(player.id, status)
             return ParticipationResponseEnum.SUCCESS
 
-    return ParticipationResponseEnum.SUCCESS
+    return ParticipationResponseEnum.NO_PLAYER
 
 
 def generate_help_text(is_mod: bool) -> str:

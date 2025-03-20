@@ -103,6 +103,7 @@ class SlashCommands(Enum):
     PROCESS_PLAYERS = 'process_players_wait_list'
     GET_PLAYER_STATUS = 'get_player_status'
     UPDATE_PARTICIPATION = 'update_participation_command'
+    HELP = 'help'
 
 
 class PlayerStatusEnum(Enum):
