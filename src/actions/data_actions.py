@@ -126,18 +126,13 @@ def update_participation(summoner_name: str, participation: bool, discord_id: in
     player: Player | None = get_player_by_summoner_name(summoner_name)
     print(summoner_name, player)
     if player is not None:
-        print('p1')
         if player.player_status == PlayerStatusEnum.BANNED.value:
-            print('banned')
             return ParticipationResponseEnum.BANNED
         elif player.player_status == PlayerStatusEnum.UNPROCESSED.value:
-            print('unprocessed')
             return ParticipationResponseEnum.UNPROCESSED
         elif player.discord_id != discord_id:
-            print('other user')
             return ParticipationResponseEnum.NOT_CORRECT_DISCORD_ID
         else:
-            print('success')
             status: PlayerStatusEnum = PlayerStatusEnum.COMPETING if participation else PlayerStatusEnum.NOT_COMPETING
             db_update_player_status(player.id, status)
             return ParticipationResponseEnum.SUCCESS

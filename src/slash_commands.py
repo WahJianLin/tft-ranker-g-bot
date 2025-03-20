@@ -138,7 +138,7 @@ async def help_command(interaction: discord.Interaction):
     logging.info(SLASH_COMMANDS.format(SlashCommands.HELP.value))
     await interaction.response.send_message(generate_help_text(is_mod(interaction.user.roles)))
 
-
+# TODO look to use annotation instead of set up below. If it is worth the time.
 def setup(client: commands.Bot):
     client.tree.add_command(discord.app_commands.Command(
         name='test',
