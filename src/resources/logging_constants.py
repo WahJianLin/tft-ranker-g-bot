@@ -1,18 +1,18 @@
 # SLASH LOGGING
 
 ERROR_EXISTING_SUMMONER: str = "Failure: {} is already registered."
-PERMISSION_IS_NOT_MOD: str = "User is not a Mod"
+PERMISSION_IS_NOT_MOD: str = "User is not a Mod."
 
 SLASH_COMMANDS: str = 'Slash Command {} executed'
 COMMAND_SUCCESS: str = 'Command Success'
 COMMAND_FAIL: str = 'Command Failure'
 
-COMMAND_SUCCESS_SUMMONER_REGISTERED: str = "Registration Success. Please wait until mod reviews registration"
+COMMAND_SUCCESS_SUMMONER_REGISTERED: str = "Registration Success. Please wait until mod reviews registration."
 COMMAND_SUCCESS_PROCESS: str = "Players have been processed into competitors."
 
-COMMAND_ERROR_UNEXPECTED: str = "Failure: Unexpected Error"
-COMMAND_ERROR_SUMMONER_NAME: str = "Failure: Invalid Summoner Name {}. Summoner_name should match name#tag format"
-COMMAND_ERROR_SUMMONER_NOT_FOUND: str = "Failure: Summoner Name {} on server {} not found in riot database."
+COMMAND_ERROR_UNEXPECTED: str = "Failure: Unexpected Error."
+COMMAND_ERROR_SUMMONER_NAME: str = "Failure: Invalid Summoner Name {}. Summoner_name should match name#tag format."
+COMMAND_ERROR_SUMMONER_NOT_FOUND: str = "Failure: Summoner Name and selected server combination not found in riot database."
 COMMAND_ERROR_DISPLAY_NAME_LENGTH: str = "Failure: Display Name needs to be between 2 and 17 characters long."
 
 DATABASE_CALL: str = 'Database Action {} executed'

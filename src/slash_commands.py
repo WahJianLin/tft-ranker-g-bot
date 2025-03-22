@@ -80,7 +80,7 @@ async def join_ranked_race_command(interaction: discord.Interaction, summoner_na
                 logging.info(SLASH_COMMANDS.format(CommandNameEnum.REGISTER_FOR_RACE.value))
             else:
                 await interaction.response.send_message(
-                    COMMAND_ERROR_SUMMONER_NOT_FOUND.format(summoner_name, server.value.upper()),
+                    COMMAND_ERROR_SUMMONER_NOT_FOUND,
                     ephemeral=True)
     except Exception as e:
         logging.info(SLASH_COMMANDS.format(COMMAND_FAIL))
