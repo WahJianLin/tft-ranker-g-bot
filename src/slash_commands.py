@@ -58,7 +58,7 @@ async def join_ranked_race_command(interaction: discord.Interaction, summoner_na
             await interaction.response.send_message(
                 COMMAND_ERROR_DISPLAY_NAME_LENGTH,
                 ephemeral=True)
-        elif get_player_by_summoner_name(summoner_name) is not None:
+        elif get_player_by_summoner_name(summoner_name.lower()) is not None:
             await interaction.response.send_message(
                 ERROR_EXISTING_SUMMONER.format(summoner_name),
                 ephemeral=True)

@@ -122,7 +122,7 @@ class CommandNameEnum(Enum):
     MOD_PLAYERS_BY_STATUS = 'mod_get_players_by_status'
     REGISTER_FOR_RACE = 'join_ranked_race'
     PLAYER_PARTICIPATION = 'player_participation'
-    HELP = 'help'
+    HELP = 'clammy_help'
 
 
 class CommandDescEnum:
