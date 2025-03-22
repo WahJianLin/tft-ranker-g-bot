@@ -17,7 +17,7 @@ def register_player(
         location: ServerLocationEnum,
         display_name: str | None,
         discord_id: int,
-        is_streamer: bool = False
+        is_streamer: bool = False,
 ) -> None:
     display_name_to_save: str = display_name if display_name is not None else summoner_name.split("#")[0]
     join_date: date = date.today()
@@ -60,12 +60,12 @@ def process_waitlist() -> None:
         player_data_res: PlayerDataRes = get_player_data_call(player.summoner_name, player.region)
         summoner_id: str | None = get_summoner_id_call(player_data_res.puuid, player.riot_server)
 
-        if get_player_riot_data_by_id(player.id) is None:
+        if get_player_riot_data_by_id(player.id) is None and summoner_id is not None:
             player_ids.append(player.id)
             summoner_data_tpl.append(
                 (player.id, summoner_id))
         else:
-            logging.info("Failed: Competitor already registered")
+            logging.info(f"Player {player.summoner_name} was not registered with '{summoner_id}'")
 
     # processes the players into competitors and updates relevant tables
     if summoner_data_tpl:

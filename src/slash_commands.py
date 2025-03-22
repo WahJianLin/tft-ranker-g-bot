@@ -9,9 +9,10 @@ from src.actions.data_actions import get_leaderboard_result, process_waitlist, g
     update_participation, generate_help_text
 from src.actions.database import get_player_by_summoner_name
 from src.actions.permission import is_mod
-from src.actions.riot_api import get_player_data_call
+from src.actions.riot_api import get_player_data_call, get_summoner_id_call
 from src.resources.constants import REGION_MAP, SlashCommands, ONLY_MODS, VALID_SUMMONER_NAME_REGEX, ServerLocationEnum, \
-    PlayerStatusEnum, CommandNameEnum, CommandDescriptionEnum
+    PlayerStatusEnum, CommandNameEnum, CommandDescriptionEnum, SERVER_NAME_MAP
+from src.resources.entity import PlayerDataRes
 from src.resources.logging_constants import SLASH_COMMANDS, COMMAND_SUCCESS, COMMAND_FAIL, COMMAND_ERROR_UNEXPECTED, \
     COMMAND_ERROR_SUMMONER_NAME, ERROR_EXISTING_SUMMONER, COMMAND_SUCCESS_SUMMONER_REGISTERED, \
     COMMAND_ERROR_SUMMONER_NOT_FOUND, COMMAND_SUCCESS_PROCESS, PERMISSION_IS_NOT_MOD, COMMAND_ERROR_DISPLAY_NAME_LENGTH
@@ -47,6 +48,7 @@ async def join_ranked_race_command(interaction: discord.Interaction, summoner_na
         logging.info(
             f"With Data -> summoner_name: {summoner_name}, server: {server}, display_name: {display_name}, is_streamer: {is_streamer}")
 
+        # To Do filter out malicious display names
         if not re.search(VALID_SUMMONER_NAME_REGEX, summoner_name):
             await interaction.response.send_message(
                 COMMAND_ERROR_SUMMONER_NAME.format(summoner_name),
@@ -59,11 +61,14 @@ async def join_ranked_race_command(interaction: discord.Interaction, summoner_na
             await interaction.response.send_message(
                 ERROR_EXISTING_SUMMONER.format(summoner_name),
                 ephemeral=True)
-        # To Do filter out malicious display names
-        elif get_player_data_call(summoner_name, REGION_MAP[server]):
+
+        player_account: PlayerDataRes | None = get_player_data_call(summoner_name, REGION_MAP[server])
+        summoner_id: str | None = get_summoner_id_call(player_account.puuid, SERVER_NAME_MAP[server]) if player_account is not None else None
+        if summoner_id is not None:
             await interaction.response.defer()
             await asyncio.sleep(5)
             # registers player
+            # todo Update to save summoner id here if possible. Potential issues would stem from discord hosting speeds.
             register_player(summoner_name, server, display_name, interaction.user.id, is_streamer)
 
             logging.info(SLASH_COMMANDS.format(COMMAND_SUCCESS))
@@ -73,7 +78,7 @@ async def join_ranked_race_command(interaction: discord.Interaction, summoner_na
             logging.info(SLASH_COMMANDS.format(SlashCommands.JOIN_RANKED_RACE.value))
         else:
             await interaction.response.send_message(
-                COMMAND_ERROR_SUMMONER_NOT_FOUND.format(summoner_name),
+                COMMAND_ERROR_SUMMONER_NOT_FOUND.format(summoner_name, server.value.upper()),
                 ephemeral=True)
     except Exception as e:
         logging.info(SLASH_COMMANDS.format(COMMAND_FAIL))
