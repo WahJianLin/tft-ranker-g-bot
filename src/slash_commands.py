@@ -4,9 +4,10 @@ import re
 
 import discord
 from discord.ext import commands
+from profanity_check import predict, predict_prob
 
 from src.actions.data_actions import get_leaderboard_result, process_waitlist, get_player_by_status, register_player, \
-    update_participation, generate_help_text
+    update_participation, generate_help_text, update_display_name
 from src.actions.database import get_player_by_summoner_name
 from src.actions.permission import is_mod
 from src.actions.riot_api import get_player_data_call
@@ -16,13 +17,17 @@ from src.resources.constants import REGION_MAP, SlashCommands, ONLY_MODS, VALID_
 from src.resources.entity import Player
 from src.resources.logging_constants import SLASH_COMMANDS, COMMAND_SUCCESS, COMMAND_FAIL, COMMAND_ERROR_UNEXPECTED, \
     COMMAND_ERROR_SUMMONER_NAME, ERROR_EXISTING_SUMMONER, COMMAND_SUCCESS_SUMMONER_REGISTERED, \
-    COMMAND_ERROR_SUMMONER_NOT_FOUND, COMMAND_SUCCESS_PROCESS, PERMISSION_IS_NOT_MOD, COMMAND_ERROR_DISPLAY_NAME_LENGTH
+    COMMAND_ERROR_SUMMONER_NOT_FOUND, COMMAND_SUCCESS_PROCESS, PERMISSION_IS_NOT_MOD, COMMAND_ERROR_DISPLAY_NAME_LENGTH, \
+    COMMAND_SUCCESS_DISPLAY_NAME
 
 
 async def test_command(interaction: discord.Interaction):
     logging.info(SLASH_COMMANDS.format(SlashCommands.TEST.value))
+    print(predict_prob(['jinjijin'])[0])
+    print(predict_prob(['vcat'])[0])
+    print(predict_prob(['glowyjelly'])[0])
+    print(predict_prob(['jaerak'])[0])
     await interaction.response.send_message("hello ajumma world")
-
 
 async def mod_get_leaderboard_command(interaction: discord.Interaction):
     try:
@@ -150,7 +155,13 @@ async def update_display_name_command(interaction: discord.Interaction, summoner
         validate_summoner_name_and_display_name(summoner_name, display_name)
         player: Player | None = get_player_by_summoner_name(summoner_name)
         validate_discord_id(player, interaction.user.id)
+        update_display_name(player.id, display_name)
 
+        await interaction.response.defer()
+        await asyncio.sleep(5)
+
+        await interaction.followup.send(COMMAND_SUCCESS_DISPLAY_NAME, ephemeral=True)
+        logging.info(SLASH_COMMANDS.format(COMMAND_SUCCESS))
     except ValueError as e:
         await interaction.response.send_message(e,ephemeral=True)
     except Exception as e:

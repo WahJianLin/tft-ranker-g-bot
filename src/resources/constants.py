@@ -141,7 +141,7 @@ class CommandDescriptionEnum:
     REGISTER_FOR_RACE= 'Register for ranked racing using your summoner name (EX: Player#123) and server (EX: NA)'
     PLAYER_PARTICIPATION= 'Allows Players to update their participation status in race'
     HELP = 'Shows all commands'
-    UPDATE_DISPLAY_NAME= 'Update player display name.'
+    UPDATE_DISPLAY_NAME= 'Update player display name. Please ask if you want your name to bypass the profanity filter.'
 
 MOD_HELP: str = f"""
 Mod Commands:

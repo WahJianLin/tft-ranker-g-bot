@@ -3,7 +3,7 @@ from datetime import date, datetime
 
 from src.actions.database import insert_player, get_players_by_status, insert_player_riot_data, \
     get_player_riot_data_by_ids, db_update_player_status, get_player_riot_data_by_id, get_player_by_summoner_name, \
-    update_player_processed
+    update_player_processed, db_update_player_display_name
 from src.actions.riot_api import get_ranks, get_summoner_id_call, get_player_data_call
 from src.actions.util import format_str_spacing_util
 from src.resources.constants import REGION_MAP, SERVER_NAME_MAP, LEADER_BOARD_TITLE, ServerLocationEnum, \
@@ -144,3 +144,6 @@ def generate_help_text(is_mod: bool) -> str:
     if is_mod:
         help_text += MOD_HELP
     return help_text
+
+def update_display_name(player_id: int, display_name: str):
+    db_update_player_display_name(player_id, display_name)
