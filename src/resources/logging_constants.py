@@ -14,6 +14,7 @@ COMMAND_ERROR_UNEXPECTED: str = "Failure: Unexpected Error"
 COMMAND_ERROR_SUMMONER_NAME: str = "Failure: Invalid Summoner Name {}. Summoner_name should match name#tag format"
 COMMAND_ERROR_SUMMONER_NOT_FOUND: str = "Failure: Summoner Name {} not found on riot database."
 COMMAND_ERROR_DISPLAY_NAME_LENGTH: str = "Failure: Display Name needs to be between 2 and 17 characters long."
+COMMAND_ERROR_DISCORD_ID: str = "Failure: Summoner account was registered by a different discord user"
 
 DATABASE_CALL: str = 'Database Action {} executed'
 DATABASE_SUCCESS: str = 'Database Action {} Success'
@@ -28,7 +29,6 @@ DB_CALL_GET_VALID_COMPETITORS_BY_NAMES: str = 'get_competitors_by_summoner_names
 
 DB_CALL_UPDATE_PLAYERS_PROCESSED: str = 'update_player_processed'
 DB_CALL_UPDATE_PLAYER_STATUS: str = 'update_player_status'
-
 
 DB_CALL_INSERT_PLAYER: str = 'insert_player'
 DB_CALL_INSERT_COMPETITOR: str = 'insert_competitor'

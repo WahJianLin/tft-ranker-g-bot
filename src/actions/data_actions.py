@@ -124,7 +124,6 @@ def get_leaderboard_result() -> str:
 
 def update_participation(summoner_name: str, participation: bool, discord_id: int) -> str:
     player: Player | None = get_player_by_summoner_name(summoner_name)
-    print(summoner_name, player)
     if player is not None:
         if player.player_status == PlayerStatusEnum.BANNED.value:
             return ParticipationResponseEnum.BANNED
