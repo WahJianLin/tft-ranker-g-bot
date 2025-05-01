@@ -20,6 +20,17 @@ class RiotRanksEnum(Enum):
     II = 300000
     I = 400000
 
+class TierToTitleEnum(Enum):
+    IRON = 'IR'
+    BRONZE = 'BZ'
+    SILVER = 'SV'
+    GOLD = 'GD'
+    PLATINUM = 'PLT'
+    EMERALD = 'EM'
+    DIAMOND = 'DI'
+    MASTER = 'MST'
+    GRANDMASTER = 'GM'
+    CHALLENGER = 'CHAL'
 
 class ServerLocationEnum(Enum):
     BR = 'br'
@@ -142,7 +153,7 @@ class CommandDescriptionEnum:
     PLAYER_PARTICIPATION= 'Allows Players to update their participation status in race'
     HELP = 'Shows all commands'
     UPDATE_DISPLAY_NAME= 'Update player display name. Please ask if you want your name to bypass the profanity filter.'
-
+DISCORD_TEXT_LIMIT: int = 1900
 MOD_HELP: str = f"""
 Mod Commands:
 {"-" * 30}

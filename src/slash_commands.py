@@ -18,15 +18,11 @@ from src.resources.entity import Player
 from src.resources.logging_constants import SLASH_COMMANDS, COMMAND_SUCCESS, COMMAND_FAIL, COMMAND_ERROR_UNEXPECTED, \
     COMMAND_ERROR_SUMMONER_NAME, ERROR_EXISTING_SUMMONER, COMMAND_SUCCESS_SUMMONER_REGISTERED, \
     COMMAND_ERROR_SUMMONER_NOT_FOUND, COMMAND_SUCCESS_PROCESS, PERMISSION_IS_NOT_MOD, COMMAND_ERROR_DISPLAY_NAME_LENGTH, \
-    COMMAND_SUCCESS_DISPLAY_NAME
+    COMMAND_SUCCESS_DISPLAY_NAME, COMMAND_ERROR_DISPLAY_NAME_PROFANITY
 
 
 async def test_command(interaction: discord.Interaction):
     logging.info(SLASH_COMMANDS.format(SlashCommands.TEST.value))
-    print(predict_prob(['jinjijin'])[0])
-    print(predict_prob(['vcat'])[0])
-    print(predict_prob(['glowyjelly'])[0])
-    print(predict_prob(['jaerak'])[0])
     await interaction.response.send_message("hello ajumma world")
 
 async def mod_get_leaderboard_command(interaction: discord.Interaction):
@@ -54,6 +50,7 @@ async def join_ranked_race_command(interaction: discord.Interaction, summoner_na
         logging.info(
             f"With Data -> summoner_name: {summoner_name}, server: {server}, display_name: {display_name}, is_streamer: {is_streamer}")
 
+        # todo update to use proper validator
         if not re.search(VALID_SUMMONER_NAME_REGEX, summoner_name):
             await interaction.response.send_message(
                 COMMAND_ERROR_SUMMONER_NAME.format(summoner_name),
@@ -66,7 +63,10 @@ async def join_ranked_race_command(interaction: discord.Interaction, summoner_na
             await interaction.response.send_message(
                 ERROR_EXISTING_SUMMONER.format(summoner_name),
                 ephemeral=True)
-        # To Do filter out malicious display names
+        elif predict_prob([display_name])[0]> .6:
+            await interaction.response.send_message(
+                COMMAND_ERROR_DISPLAY_NAME_PROFANITY,
+                ephemeral=True)
         elif get_player_data_call(summoner_name, REGION_MAP[server]):
             await interaction.response.defer()
             await asyncio.sleep(5)

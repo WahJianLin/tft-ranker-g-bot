@@ -8,7 +8,7 @@ from requests import Response
 
 from src.actions.database import get_competitors_by_status
 from src.resources.constants import QUEUE_TYPE, RANKED_QUEUE_TYPE, TIER, RANK, \
-    LEAGUE_POINTS, RiotTiersEnum, RiotRanksEnum
+    LEAGUE_POINTS, RiotTiersEnum, RiotRanksEnum, TierToTitleEnum
 from src.resources.entity import PlayerDataRes, LeaderboardEntry, CompetitorV
 from src.resources.logging_constants import RIOT_FAIL, RIOT_ERROR_CODE, RIOT_SUCCESS, RIOT_CALL, \
     RIOT_CALL_GET_RANK_DATA, RIOT_CALL_GET_SUMMONER_ID, RIOT_CALL_GET_PLAYER_DATA_CALL
@@ -88,7 +88,7 @@ def get_rank_data(competitor: CompetitorV) -> LeaderboardEntry | None:
                 rank: str = rank_data[RANK]  # gets rank subdivision
                 points: int = rank_data[LEAGUE_POINTS]  # gets lp value
 
-                tft_rank_title: str = f'{tier} {rank} {points} LP'
+                tft_rank_title: str = f'{TierToTitleEnum[tier].value} {rank} {points} LP'
                 tft_rank_value: int = RiotTiersEnum[tier].value + RiotRanksEnum[rank].value + points
 
                 logging.info(RIOT_SUCCESS)

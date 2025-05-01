@@ -6,7 +6,7 @@ from typing import Final
 from discord.ext import tasks
 from dotenv import load_dotenv
 
-from src.actions.data_actions import get_leaderboard_result
+from src.actions.data_actions import get_leaderboard_result_list
 
 load_dotenv()
 LEADERBOARD_CHANNEL: Final[int] = int(os.getenv('LEADERBOARD_CHANNEL'))
@@ -25,7 +25,9 @@ async def schedule_leaderboard_caller(client):
         if cur_hour in RUN_TIMES:
             logging.info(f"schedule_leaderboard_caller starting")
             try:
-                await message_channel.send(get_leaderboard_result())
+                formatted_list = get_leaderboard_result_list()
+                for entry in formatted_list:
+                    await message_channel.send(entry)
             except Exception as e:
                 logging.error(f"schedule_leaderboard_caller Unexpected Error Failed")
                 logging.exception(e)
