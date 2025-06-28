@@ -6,10 +6,10 @@ import discord
 from discord.ext import commands
 
 from src.actions.data_actions import get_leaderboard_result, process_waitlist, get_player_by_status, register_player, \
-    update_participation, generate_help_text
+    update_participation, generate_help_text, update_for_missing_puuid
 from src.actions.database import get_player_by_summoner_name
 from src.actions.permission import is_mod
-from src.actions.riot_api import get_player_data_call
+from src.actions.riot_api import riot_get_player_data_call
 from src.resources.constants import REGION_MAP, SlashCommands, ONLY_MODS, VALID_SUMMONER_NAME_REGEX, ServerLocationEnum, \
     PlayerStatusEnum, CommandNameEnum, CommandDescriptionEnum
 from src.resources.logging_constants import SLASH_COMMANDS, COMMAND_SUCCESS, COMMAND_FAIL, COMMAND_ERROR_UNEXPECTED, \
@@ -19,6 +19,7 @@ from src.resources.logging_constants import SLASH_COMMANDS, COMMAND_SUCCESS, COM
 # tested
 async def test_command(interaction: discord.Interaction):
     logging.info(SLASH_COMMANDS.format(SlashCommands.TEST.value))
+    update_for_missing_puuid()
     await interaction.response.send_message("hello ajumma world")
 
 
@@ -60,7 +61,7 @@ async def join_ranked_race_command(interaction: discord.Interaction, summoner_na
                 ERROR_EXISTING_SUMMONER.format(summoner_name),
                 ephemeral=True)
         # To Do filter out malicious display names
-        elif get_player_data_call(summoner_name, REGION_MAP[server]):
+        elif riot_get_player_data_call(summoner_name, REGION_MAP[server]):
             await interaction.response.defer()
             await asyncio.sleep(5)
             # registers player

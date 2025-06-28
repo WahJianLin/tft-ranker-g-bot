@@ -28,7 +28,7 @@ DB_CALL_GET_VALID_COMPETITORS_BY_NAMES: str = 'get_competitors_by_summoner_names
 
 DB_CALL_UPDATE_PLAYERS_PROCESSED: str = 'update_player_processed'
 DB_CALL_UPDATE_PLAYER_STATUS: str = 'update_player_status'
-
+DB_CALL_UPDATE_MISSING_PUUID: str = 'update_missing_puuid'
 
 DB_CALL_INSERT_PLAYER: str = 'insert_player'
 DB_CALL_INSERT_COMPETITOR: str = 'insert_competitor'

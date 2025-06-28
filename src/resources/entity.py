@@ -6,7 +6,7 @@ from src.resources.constants import PlayerStatusEnum
 
 @dataclass
 class Player:
-    id: int
+    id: int | None
     summoner_name: str
     display_name: str
     region: str

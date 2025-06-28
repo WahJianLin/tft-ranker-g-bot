@@ -11,7 +11,8 @@ from src.resources.entity import Player, CompetitorV, PlayerRiotData
 from src.resources.logging_constants import DATABASE_CALL, DB_CALL_GET_ALL_VALID_COMPETITOR, DATABASE_SUCCESS, \
     DATABASE_FAIL, DB_CALL_GET_VALID_COMPETITOR_BY_NAME, DB_CALL_GET_VALID_COMPETITORS_BY_NAMES, \
     DB_CALL_UPDATE_PLAYERS_PROCESSED, DB_CALL_INSERT_COMPETITOR, ERROR_EXISTING_SUMMONER, DB_CALL_INSERT_PLAYER, \
-    DB_CALL_GET_PLAYER_BY_NAME, DB_CALL_GET_PLAYERS, DB_CALL_UPDATE_PLAYER_STATUS, DB_CALL_GET_RIOT_DATA_BY_ID
+    DB_CALL_GET_PLAYER_BY_NAME, DB_CALL_GET_PLAYERS, DB_CALL_UPDATE_PLAYER_STATUS, DB_CALL_GET_RIOT_DATA_BY_ID, \
+    DB_CALL_UPDATE_MISSING_PUUID
 
 load_dotenv()
 
@@ -228,6 +229,27 @@ def get_player_riot_data_by_ids(player_ids: list[int]) -> list[PlayerRiotData] |
         raise Exception(format(e)) from None
 
 
+def get_missing_puuid() -> list[tuple[int, str, str]]:
+    try:
+        logging.info(DATABASE_CALL.format(DB_CALL_GET_VALID_COMPETITORS_BY_NAMES))
+        conn: connection = db_base_connect()
+        db_cursor: cursor = conn.cursor()
+
+        query: str = f"SELECT rd.id, pl.summoner_name, pl.region FROM {SCHEMA}.{PLAYER_TABLE} AS pl JOIN {SCHEMA}.{RIOT_DATA_TABLE} AS rd on pl.id = rd.player_id WHERE rd.puuid IS NULL"
+        db_cursor.execute(query)
+        records: list[tuple[any, ...]] = db_cursor.fetchall()
+
+        missing_list: list[tuple[int, str, str]] = [(record[0], record[1], record[2]) for record in records]
+        db_cursor.close()
+        conn.close()
+
+        logging.info(DATABASE_SUCCESS.format(DB_CALL_GET_VALID_COMPETITORS_BY_NAMES))
+        return missing_list
+    except Exception as e:
+        logging.exception(e)
+        raise Exception(format(e)) from None
+
+
 def update_player_processed(player_ids: list[int]) -> None:
     try:
         logging.info(DATABASE_CALL.format(DB_CALL_UPDATE_PLAYERS_PROCESSED))
@@ -300,6 +322,29 @@ def insert_player_riot_data(competitors_list: list[tuple[int, str]]) -> None:
         logging.exception(e)
         raise Exception(format(e)) from None
 
+def update_missing_puuid(puuid_list: list[tuple[int, str]]) -> None:
+    try:
+        logging.info(DATABASE_CALL.format(DB_CALL_UPDATE_MISSING_PUUID))
+        conn: connection = db_base_connect()
+        db_cursor: cursor = conn.cursor()
+
+        args_str = ','.join(
+            db_cursor.mogrify("(%s, %s)", tpl).decode('utf-8') for tpl in
+            puuid_list)
+
+        query = f"UPDATE {SCHEMA}.{RIOT_DATA_TABLE} AS rd SET puuid = v.puuid FROM (VALUES {args_str}) AS v(id, puuid) WHERE rd.id = v.id;"
+
+        db_cursor.execute(query)
+
+        conn.commit()
+        db_cursor.close()
+        conn.close()
+
+        logging.info(DATABASE_SUCCESS.format(DB_CALL_UPDATE_MISSING_PUUID))
+    except Exception as e:
+        logging.info(DATABASE_FAIL.format(DB_CALL_INSERT_COMPETITOR))
+        logging.exception(e)
+        raise Exception(format(e)) from None
 
 def db_update_player_status(player_id: int, status: PlayerStatusEnum) -> None:
     try:

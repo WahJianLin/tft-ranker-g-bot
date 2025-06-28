@@ -3,8 +3,8 @@ from datetime import date, datetime
 
 from src.actions.database import insert_player, get_players_by_status, insert_player_riot_data, \
     get_player_riot_data_by_ids, db_update_player_status, get_player_riot_data_by_id, get_player_by_summoner_name, \
-    update_player_processed
-from src.actions.riot_api import get_ranks, get_summoner_id_call, get_player_data_call
+    update_player_processed, get_missing_puuid, update_missing_puuid
+from src.actions.riot_api import riot_get_ranks, riot_get_player_data_call, riot_get_missing_puuid
 from src.actions.util import format_str_spacing_util
 from src.resources.constants import REGION_MAP, SERVER_NAME_MAP, LEADER_BOARD_TITLE, ServerLocationEnum, \
     LIST_PLAYERS_TITLE, PlayerStatusEnum, ParticipationResponseEnum, PLAYER_HELP, MOD_HELP
@@ -23,7 +23,8 @@ def register_player(
     join_date: date = date.today()
     processed_date: date | None = None
 
-    player: Player = Player(None, summoner_name.lower(), display_name_to_save, REGION_MAP[location], SERVER_NAME_MAP[location],
+    player: Player = Player(None, summoner_name.lower(), display_name_to_save, REGION_MAP[location],
+                            SERVER_NAME_MAP[location],
                             join_date, processed_date, is_streamer, PlayerStatusEnum.UNPROCESSED.value, discord_id)
     insert_player(player)
 
@@ -51,13 +52,13 @@ def get_player_by_status(status: PlayerStatusEnum) -> str:
 # processing waitlist
 def process_waitlist() -> None:
     player_list: list[Player] = get_players_by_status()
-    summoner_data_tpl: list[tuple[int, str]] = [] # player id and puuid
+    summoner_data_tpl: list[tuple[int, str]] = []  # player id and puuid
     player_ids: list[int] = []
 
     # gets list of unregistered players and player ids
     for player in player_list:
 
-        player_data_res: PlayerDataRes = get_player_data_call(player.summoner_name, player.region)
+        player_data_res: PlayerDataRes = riot_get_player_data_call(player.summoner_name, player.region)
 
         if get_player_riot_data_by_id(player.id) is None:
             player_ids.append(player.id)
@@ -82,6 +83,12 @@ def process_waitlist() -> None:
     else:
         logging.info("Failed: No Competitor to add")
 
+
+def update_for_missing_puuid() -> None:
+    missing_list: list[tuple[int, str, str]] = get_missing_puuid()
+    if len(missing_list) > 0:
+        puuid_list: list[tuple[int, str]] = riot_get_missing_puuid(missing_list)
+        update_missing_puuid(puuid_list)
 
 # generating leaderboard
 def sort_leaderboard(leaderboard_entries: list[LeaderboardEntry]) -> None:
@@ -116,7 +123,7 @@ def gen_ranked_leaderboard_text(leaderboard_entries: list[LeaderboardEntry]) -> 
 
 
 def get_leaderboard_result() -> str:
-    leaderboard_entries: list[LeaderboardEntry] = get_ranks()
+    leaderboard_entries: list[LeaderboardEntry] = riot_get_ranks()
     sort_leaderboard(leaderboard_entries)
     return gen_ranked_leaderboard_text(leaderboard_entries)
 
