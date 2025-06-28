@@ -16,7 +16,7 @@ from src.resources.logging_constants import SLASH_COMMANDS, COMMAND_SUCCESS, COM
     COMMAND_ERROR_SUMMONER_NAME, ERROR_EXISTING_SUMMONER, COMMAND_SUCCESS_SUMMONER_REGISTERED, \
     COMMAND_ERROR_SUMMONER_NOT_FOUND, COMMAND_SUCCESS_PROCESS, PERMISSION_IS_NOT_MOD, COMMAND_ERROR_DISPLAY_NAME_LENGTH
 
-
+# tested
 async def test_command(interaction: discord.Interaction):
     logging.info(SLASH_COMMANDS.format(SlashCommands.TEST.value))
     await interaction.response.send_message("hello ajumma world")
