@@ -22,7 +22,8 @@ class Player:
 class PlayerRiotData:
     id: int
     player_id: int
-    summoner_id: str
+    summoner_id: str | None
+    puuid: str | None
 
 
 @dataclass

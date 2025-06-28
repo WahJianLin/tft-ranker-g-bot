@@ -190,7 +190,7 @@ def get_player_riot_data_by_id(player_id: int) -> PlayerRiotData | None:
             logging.info(DATABASE_SUCCESS.format(DB_CALL_GET_RIOT_DATA_BY_ID))
             return None
 
-        player_riot_data: PlayerRiotData = PlayerRiotData(record[0], record[1], record[2])
+        player_riot_data: PlayerRiotData = PlayerRiotData(record[0], record[1], None, record[2])
         logging.info(DATABASE_SUCCESS.format(DB_CALL_GET_RIOT_DATA_BY_ID))
         return player_riot_data
     except Exception as e:
@@ -208,13 +208,13 @@ def get_player_riot_data_by_ids(player_ids: list[int]) -> list[PlayerRiotData] |
         player_riot_data_list: list[PlayerRiotData] = []
 
         format_strings = ','.join(['%s'] * len(player_ids))
-        query: str = f"SELECT * FROM {SCHEMA}.{RIOT_DATA_TABLE} WHERE player_id IN (%s)" % format_strings
+        query: str = f"SELECT id, player_id, puuid FROM {SCHEMA}.{RIOT_DATA_TABLE} WHERE player_id IN (%s)" % format_strings
         db_cursor.execute(query, tuple(player_ids))
         records: list[tuple[any, ...]] = db_cursor.fetchall()
 
         for player_data_tpl in records:
             player_data: PlayerRiotData = PlayerRiotData(player_data_tpl[0], player_data_tpl[1],
-                                                         player_data_tpl[2])
+                                                         None, player_data_tpl[2])
             player_riot_data_list.append(player_data)
 
         db_cursor.close()
@@ -283,7 +283,7 @@ def insert_player_riot_data(competitors_list: list[tuple[int, str]]) -> None:
         logging.info(DATABASE_CALL.format(DB_CALL_INSERT_COMPETITOR))
         conn: connection = db_base_connect()
         db_cursor: cursor = conn.cursor()
-        query: str = f"INSERT INTO {SCHEMA}.{RIOT_DATA_TABLE}(player_id, summoner_id)	VALUES "
+        query: str = f"INSERT INTO {SCHEMA}.{RIOT_DATA_TABLE}(player_id, puuid)	VALUES "
         args_str = ','.join(
             db_cursor.mogrify("(%s, %s)", competitor).decode('utf-8') for competitor in
             competitors_list)

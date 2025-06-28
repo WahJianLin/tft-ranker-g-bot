@@ -39,7 +39,7 @@ async def mod_get_leaderboard_command(interaction: discord.Interaction):
         await interaction.response.send_message(COMMAND_ERROR_UNEXPECTED,
                                                 ephemeral=True)
 
-
+# tested
 async def join_ranked_race_command(interaction: discord.Interaction, summoner_name: str, server: ServerLocationEnum,
                                    display_name: str | None, is_streamer: bool = False):
     try:
@@ -82,7 +82,7 @@ async def join_ranked_race_command(interaction: discord.Interaction, summoner_na
             COMMAND_ERROR_UNEXPECTED,
             ephemeral=True)
 
-
+# tested
 async def mod_process_registered_players_command(interaction: discord.Interaction):
     try:
         logging.info(SLASH_COMMANDS.format(SlashCommands.PROCESS_PLAYERS.value))

@@ -51,19 +51,18 @@ def get_player_by_status(status: PlayerStatusEnum) -> str:
 # processing waitlist
 def process_waitlist() -> None:
     player_list: list[Player] = get_players_by_status()
-    summoner_data_tpl: list[tuple[int, str]] = []
+    summoner_data_tpl: list[tuple[int, str]] = [] # player id and puuid
     player_ids: list[int] = []
 
     # gets list of unregistered players and player ids
     for player in player_list:
 
         player_data_res: PlayerDataRes = get_player_data_call(player.summoner_name, player.region)
-        summoner_id: str | None = get_summoner_id_call(player_data_res.puuid, player.riot_server)
 
         if get_player_riot_data_by_id(player.id) is None:
             player_ids.append(player.id)
             summoner_data_tpl.append(
-                (player.id, summoner_id))
+                (player.id, player_data_res.puuid))
         else:
             logging.info("Failed: Competitor already registered")
 
