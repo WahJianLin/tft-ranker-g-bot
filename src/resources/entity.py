@@ -32,7 +32,8 @@ class CompetitorV:
     display_name: str
     riot_server: str
     player_status: PlayerStatusEnum
-    summoner_id: str
+    summoner_id: str | None
+    puuid: str | None
 
 
 @dataclass

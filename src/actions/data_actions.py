@@ -90,6 +90,7 @@ def update_for_missing_puuid() -> None:
         puuid_list: list[tuple[int, str]] = riot_get_missing_puuid(missing_list)
         update_missing_puuid(puuid_list)
 
+
 # generating leaderboard
 def sort_leaderboard(leaderboard_entries: list[LeaderboardEntry]) -> None:
     leaderboard_entries.sort(key=lambda entry: entry.tft_rank_value, reverse=True)

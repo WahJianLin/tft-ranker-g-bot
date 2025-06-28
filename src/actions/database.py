@@ -136,7 +136,7 @@ def get_competitors_by_status() -> list[CompetitorV] | None:
         records: list[tuple[any, ...]] = db_cursor.fetchall()
         for comp_tpl in records:
             competitor: CompetitorV = CompetitorV(comp_tpl[0], comp_tpl[1], comp_tpl[2],
-                                                  PlayerStatusEnum(comp_tpl[3]), comp_tpl[4])
+                                                  PlayerStatusEnum(comp_tpl[3]), comp_tpl[4], comp_tpl[5])
             competitor_list.append(competitor)
         db_cursor.close()
         conn.close()
@@ -322,6 +322,7 @@ def insert_player_riot_data(competitors_list: list[tuple[int, str]]) -> None:
         logging.exception(e)
         raise Exception(format(e)) from None
 
+
 def update_missing_puuid(puuid_list: list[tuple[int, str]]) -> None:
     try:
         logging.info(DATABASE_CALL.format(DB_CALL_UPDATE_MISSING_PUUID))
@@ -345,6 +346,7 @@ def update_missing_puuid(puuid_list: list[tuple[int, str]]) -> None:
         logging.info(DATABASE_FAIL.format(DB_CALL_INSERT_COMPETITOR))
         logging.exception(e)
         raise Exception(format(e)) from None
+
 
 def db_update_player_status(player_id: int, status: PlayerStatusEnum) -> None:
     try:

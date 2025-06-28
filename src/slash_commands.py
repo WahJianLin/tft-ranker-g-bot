@@ -16,6 +16,7 @@ from src.resources.logging_constants import SLASH_COMMANDS, COMMAND_SUCCESS, COM
     COMMAND_ERROR_SUMMONER_NAME, ERROR_EXISTING_SUMMONER, COMMAND_SUCCESS_SUMMONER_REGISTERED, \
     COMMAND_ERROR_SUMMONER_NOT_FOUND, COMMAND_SUCCESS_PROCESS, PERMISSION_IS_NOT_MOD, COMMAND_ERROR_DISPLAY_NAME_LENGTH
 
+
 # tested
 async def test_command(interaction: discord.Interaction):
     logging.info(SLASH_COMMANDS.format(SlashCommands.TEST.value))
@@ -39,6 +40,7 @@ async def mod_get_leaderboard_command(interaction: discord.Interaction):
         logging.exception(e)
         await interaction.response.send_message(COMMAND_ERROR_UNEXPECTED,
                                                 ephemeral=True)
+
 
 # tested
 async def join_ranked_race_command(interaction: discord.Interaction, summoner_name: str, server: ServerLocationEnum,
@@ -83,6 +85,7 @@ async def join_ranked_race_command(interaction: discord.Interaction, summoner_na
             COMMAND_ERROR_UNEXPECTED,
             ephemeral=True)
 
+
 # tested
 async def mod_process_registered_players_command(interaction: discord.Interaction):
     try:
@@ -126,8 +129,9 @@ async def mod_get_players_by_status_command(interaction: discord.Interaction, st
 async def update_participation_command(interaction: discord.Interaction, summoner_name: str, participation: bool):
     try:
         logging.info(SLASH_COMMANDS.format(SlashCommands.UPDATE_PARTICIPATION.value))
-        await interaction.response.send_message(update_participation(summoner_name.lower(), participation, interaction.user.id),
-                                                ephemeral=True)
+        await interaction.response.send_message(
+            update_participation(summoner_name.lower(), participation, interaction.user.id),
+            ephemeral=True)
     except Exception as e:
         logging.info(SLASH_COMMANDS.format(COMMAND_FAIL))
         logging.exception(e)
@@ -138,6 +142,7 @@ async def update_participation_command(interaction: discord.Interaction, summone
 async def help_command(interaction: discord.Interaction):
     logging.info(SLASH_COMMANDS.format(SlashCommands.HELP.value))
     await interaction.response.send_message(generate_help_text(is_mod(interaction.user.roles)))
+
 
 # TODO look to use annotation instead of set up below. If it is worth the time.
 def setup(client: commands.Bot):
