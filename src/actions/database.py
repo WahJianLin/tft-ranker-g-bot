@@ -12,7 +12,7 @@ from src.resources.logging_constants import DATABASE_CALL, DB_CALL_GET_ALL_VALID
     DATABASE_FAIL, DB_CALL_GET_VALID_COMPETITOR_BY_NAME, DB_CALL_GET_VALID_COMPETITORS_BY_NAMES, \
     DB_CALL_UPDATE_PLAYERS_PROCESSED, DB_CALL_INSERT_COMPETITOR, ERROR_EXISTING_SUMMONER, DB_CALL_INSERT_PLAYER, \
     DB_CALL_GET_PLAYER_BY_NAME, DB_CALL_GET_PLAYERS, DB_CALL_UPDATE_PLAYER_STATUS, DB_CALL_GET_RIOT_DATA_BY_ID, \
-    DB_CALL_UPDATE_MISSING_PUUID
+    DB_CALL_UPDATE_MISSING_PUUID, DB_CALL_GET_MISSING_PUUID
 
 load_dotenv()
 
@@ -231,7 +231,7 @@ def get_player_riot_data_by_ids(player_ids: list[int]) -> list[PlayerRiotData] |
 
 def get_missing_puuid() -> list[tuple[int, str, str]]:
     try:
-        logging.info(DATABASE_CALL.format(DB_CALL_GET_VALID_COMPETITORS_BY_NAMES))
+        logging.info(DATABASE_CALL.format(DB_CALL_GET_MISSING_PUUID))
         conn: connection = db_base_connect()
         db_cursor: cursor = conn.cursor()
 
@@ -243,7 +243,7 @@ def get_missing_puuid() -> list[tuple[int, str, str]]:
         db_cursor.close()
         conn.close()
 
-        logging.info(DATABASE_SUCCESS.format(DB_CALL_GET_VALID_COMPETITORS_BY_NAMES))
+        logging.info(DATABASE_SUCCESS.format(DB_CALL_GET_MISSING_PUUID))
         return missing_list
     except Exception as e:
         logging.exception(e)
@@ -343,7 +343,7 @@ def update_missing_puuid(puuid_list: list[tuple[int, str]]) -> None:
 
         logging.info(DATABASE_SUCCESS.format(DB_CALL_UPDATE_MISSING_PUUID))
     except Exception as e:
-        logging.info(DATABASE_FAIL.format(DB_CALL_INSERT_COMPETITOR))
+        logging.info(DATABASE_FAIL.format(DB_CALL_UPDATE_MISSING_PUUID))
         logging.exception(e)
         raise Exception(format(e)) from None
 
