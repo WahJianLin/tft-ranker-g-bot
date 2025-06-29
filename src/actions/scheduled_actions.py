@@ -24,7 +24,7 @@ async def schedule_leaderboard_caller(client):
         if cur_hour in RUN_TIMES:
             logging.info(f"schedule_leaderboard_caller starting")
             try:
-                formatted_list = get_leaderboard_result_list()
+                formatted_list: list[str] = get_leaderboard_result_list()
                 for entry in formatted_list:
                     await message_channel.send(entry)
             except Exception as e:

@@ -88,7 +88,9 @@ def update_for_missing_puuid() -> None:
     missing_list: list[tuple[int, str, str]] = get_missing_puuid()
     if len(missing_list) > 0:
         puuid_list: list[tuple[int, str]] = riot_get_missing_puuid(missing_list)
-        update_missing_puuid(puuid_list)
+        if len(puuid_list) > 0:
+            # update_missing_puuid(puuid_list)
+            pass
 
 
 # generating leaderboard
@@ -146,7 +148,7 @@ def get_leaderboard_result_list() -> list[str]:
     sort_leaderboard(leaderboard_entries)
     temp_str: str = LEADER_BOARD_TITLE + '\n'
     temp_str += ""
-    leaderboard_str_list = []
+    leaderboard_str_list: list[str] = []
 
     formatted_leaderboard: list[str] = format_leader_board_entries(leaderboard_entries)
     for entry in range(len(formatted_leaderboard)):

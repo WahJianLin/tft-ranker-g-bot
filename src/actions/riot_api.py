@@ -126,7 +126,14 @@ def riot_get_ranks() -> list[LeaderboardEntry]:
 # input missing_list -> riot table id, summoner_name, region
 def riot_get_missing_puuid(missing_list: list[tuple[int, str, str]]) -> list[tuple[int, str]]:
     puuid_list: list[tuple[int, str]] = []
-    for entry in missing_list:
-        player_data: PlayerDataRes = riot_get_player_data_call(entry[1], entry[2])
-        puuid_list.append((entry[0], player_data.puuid))
+    try:
+        for entry in missing_list:
+            player_data: PlayerDataRes = riot_get_player_data_call(entry[1], entry[2])
+            logging.info("entry{}", entry)
+            logging.info("player data {}", player_data)
+            if entry[0] is not None and player_data is not None:
+                puuid_list.append((entry[0], player_data.puuid))
+    except Exception as e:
+        logging.exception(e)
+    logging.info("target found here {}", puuid_list)
     return puuid_list
