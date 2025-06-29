@@ -21,6 +21,19 @@ class RiotRanksEnum(Enum):
     I = 400000
 
 
+class TierToTitleEnum(Enum):
+    IRON = 'IR'
+    BRONZE = 'BZ'
+    SILVER = 'SV'
+    GOLD = 'GD'
+    PLATINUM = 'PLT'
+    EMERALD = 'EM'
+    DIAMOND = 'DI'
+    MASTER = 'MST'
+    GRANDMASTER = 'GM'
+    CHALLENGER = 'CHAL'
+
+
 class ServerLocationEnum(Enum):
     BR = 'br'
     EUNE = 'eune'
@@ -97,13 +110,14 @@ LIST_PLAYERS_TITLE: str = 'List of {} players'
 
 
 class SlashCommands(Enum):
-    TEST = 'test'
-    LEADERBOARD = 'leaderboard'
-    JOIN_RANKED_RACE = 'join_ranked_race'
-    PROCESS_PLAYERS = 'process_players_wait_list'
-    GET_PLAYER_STATUS = 'get_player_status'
+    TEST = 'test_command'
+    LEADERBOARD = 'leaderboard_command'
+    JOIN_RANKED_RACE = 'join_ranked_race_command'
+    PROCESS_PLAYERS = 'process_players_wait_list_command'
+    GET_PLAYER_STATUS = 'get_player_status_command'
     UPDATE_PARTICIPATION = 'update_participation_command'
-    HELP = 'help'
+    HELP = 'help_command'
+    UPDATE_DISPLAY_NAME = 'update_display_name_command'
 
 
 class PlayerStatusEnum(Enum):
@@ -132,6 +146,7 @@ class CommandNameEnum:
     REGISTER_FOR_RACE = 'join_ranked_race'
     PLAYER_PARTICIPATION = 'player_participation'
     HELP = 'help'
+    UPDATE_DISPLAY_NAME = 'update_display_name'
 
 
 class CommandDescriptionEnum:
@@ -141,14 +156,17 @@ class CommandDescriptionEnum:
     REGISTER_FOR_RACE = 'Register for ranked racing using your summoner name (EX: Player#123) and server (EX: NA)'
     PLAYER_PARTICIPATION = 'Allows Players to update their participation status in race'
     HELP = 'Shows all commands'
+    UPDATE_DISPLAY_NAME = 'Update player display name. Please ask if you want your name to bypass the profanity filter.'
 
+
+DISCORD_TEXT_LIMIT: int = 1900
 
 MOD_HELP: str = f"""
 Mod Commands:
 {"-" * 30}
-{CommandNameEnum.MOD_LEADERBOARD}: {CommandDescriptionEnum.MOD_LEADERBOARD}
-{CommandNameEnum.MOD_PROCESS_WAIT_LIST}: {CommandDescriptionEnum.MOD_PROCESS_WAIT_LIST}
-{CommandNameEnum.MOD_PLAYERS_BY_STATUS}: {CommandDescriptionEnum.MOD_PLAYERS_BY_STATUS}
+/{CommandNameEnum.MOD_LEADERBOARD}: {CommandDescriptionEnum.MOD_LEADERBOARD}
+/{CommandNameEnum.MOD_PROCESS_WAIT_LIST}: {CommandDescriptionEnum.MOD_PROCESS_WAIT_LIST}
+/{CommandNameEnum.MOD_PLAYERS_BY_STATUS}: {CommandDescriptionEnum.MOD_PLAYERS_BY_STATUS}
 {"-" * 30}
 """
 
@@ -157,8 +175,8 @@ PLAYER_HELP: str = f"""
 \n
 Player Commands
 {"-" * 30}
-{CommandNameEnum.REGISTER_FOR_RACE}: {CommandDescriptionEnum.REGISTER_FOR_RACE}
-{CommandNameEnum.PLAYER_PARTICIPATION}: {CommandDescriptionEnum.PLAYER_PARTICIPATION}
+/{CommandNameEnum.REGISTER_FOR_RACE}: {CommandDescriptionEnum.REGISTER_FOR_RACE}
+/{CommandNameEnum.PLAYER_PARTICIPATION}: {CommandDescriptionEnum.PLAYER_PARTICIPATION}
 {"-" * 30}
 
 """

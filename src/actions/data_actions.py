@@ -1,13 +1,13 @@
 import logging
-from datetime import date, datetime
+from datetime import date
 
 from src.actions.database import insert_player, get_players_by_status, insert_player_riot_data, \
     get_player_riot_data_by_ids, db_update_player_status, get_player_riot_data_by_id, get_player_by_summoner_name, \
-    update_player_processed, get_missing_puuid, update_missing_puuid
+    update_player_processed, get_missing_puuid, update_missing_puuid, db_update_player_display_name
 from src.actions.riot_api import riot_get_ranks, riot_get_player_data_call, riot_get_missing_puuid
 from src.actions.util import format_str_spacing_util
 from src.resources.constants import REGION_MAP, SERVER_NAME_MAP, LEADER_BOARD_TITLE, ServerLocationEnum, \
-    LIST_PLAYERS_TITLE, PlayerStatusEnum, ParticipationResponseEnum, PLAYER_HELP, MOD_HELP
+    LIST_PLAYERS_TITLE, PlayerStatusEnum, ParticipationResponseEnum, PLAYER_HELP, MOD_HELP, DISCORD_TEXT_LIMIT
 from src.resources.entity import Player, PlayerDataRes, LeaderboardEntry, PlayerRiotData
 
 
@@ -97,41 +97,68 @@ def sort_leaderboard(leaderboard_entries: list[LeaderboardEntry]) -> None:
 
 
 def gen_ranked_leaderboard_text(leaderboard_entries: list[LeaderboardEntry]) -> str:
-    now: datetime = datetime.now()
-    dt_string: str = now.strftime('%B %d, %Y %I:%M:%S %p')
-    leaderboard_str: str = LEADER_BOARD_TITLE + dt_string + '\n'
-    leaderboard_str += '-' * 80 + '\n'
+    leaderboard_str: str = LEADER_BOARD_TITLE + '\n'
+
+    formatted_final_leaderboard: list[str] = format_leader_board_entries(leaderboard_entries)
+    for entry in formatted_final_leaderboard:
+        leaderboard_str += entry + '\n'
+    return leaderboard_str
+
+
+def format_leader_board_entries(entries: list[LeaderboardEntry]) -> list[str]:
     rank_pos: int = 0
     last_rank_val: int = -1
+    formatted_entries = []
     final_leaderboard: list[LeaderboardEntry] = []
 
     # clears out any potential duplicates
-    for val in leaderboard_entries:
+    for val in entries:
         if val not in final_leaderboard:
             final_leaderboard.append(val)
-
-    # populates leader board
+    # formats and populates entries
     for entry in final_leaderboard:
         if last_rank_val != entry.tft_rank_value:
             last_rank_val = entry.tft_rank_value
             rank_pos += 1
         player_name_rank: str = f'{rank_pos}) {entry.display_name}'
         player_name_rank = format_str_spacing_util(player_name_rank, 25)
-        entry_detail: str = f'{player_name_rank}{entry.tft_rank_title}\n'
-        leaderboard_str += entry_detail
-    leaderboard_str += '-' * 80
-    return leaderboard_str
+        entry_detail: str = f'{player_name_rank}{entry.tft_rank_title}'
+        formatted_entries.append(entry_detail)
+
+    return formatted_entries
 
 
 def get_leaderboard_result() -> str:
     leaderboard_entries: list[LeaderboardEntry] = riot_get_ranks()
     sort_leaderboard(leaderboard_entries)
-    return gen_ranked_leaderboard_text(leaderboard_entries)
+
+    leaderboard_str: str = LEADER_BOARD_TITLE + '\n'
+
+    formatted_final_leaderboard: list[str] = format_leader_board_entries(leaderboard_entries)
+    for entry in formatted_final_leaderboard:
+        leaderboard_str += entry + '\n'
+
+    return leaderboard_str
+
+
+def get_leaderboard_result_list() -> list[str]:
+    leaderboard_entries: list[LeaderboardEntry] = riot_get_ranks()
+    sort_leaderboard(leaderboard_entries)
+    temp_str: str = LEADER_BOARD_TITLE + '\n'
+    temp_str += ""
+    leaderboard_str_list = []
+
+    formatted_leaderboard: list[str] = format_leader_board_entries(leaderboard_entries)
+    for entry in range(len(formatted_leaderboard)):
+        temp_str += formatted_leaderboard[entry] + '\n'
+        if len(temp_str) > DISCORD_TEXT_LIMIT or entry >= len(formatted_leaderboard) - 1:
+            leaderboard_str_list.append(temp_str)
+            temp_str = '-' + '\n'
+    return leaderboard_str_list
 
 
 def update_participation(summoner_name: str, participation: bool, discord_id: int) -> str:
     player: Player | None = get_player_by_summoner_name(summoner_name)
-    print(summoner_name, player)
     if player is not None:
         if player.player_status == PlayerStatusEnum.BANNED.value:
             return ParticipationResponseEnum.BANNED
@@ -152,3 +179,7 @@ def generate_help_text(is_mod: bool) -> str:
     if is_mod:
         help_text += MOD_HELP
     return help_text
+
+
+def update_display_name(player_id: int, display_name: str):
+    db_update_player_display_name(player_id, display_name)
