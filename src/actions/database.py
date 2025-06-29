@@ -369,23 +369,23 @@ def db_update_player_status(player_id: int, status: PlayerStatusEnum) -> None:
         logging.exception(e)
         raise Exception(format(e)) from None
 
-def db_update_player_display_name(player_id: int, display_name: str) -> None:
-    try:
-        logging.info(DATABASE_CALL.format(DB_CALL_UPDATE_PLAYER_DISPLAY_NAME))
-        conn: connection = db_base_connect()
-        db_cursor: cursor = conn.cursor()
-
-        query: str = f"UPDATE {SCHEMA}.{PLAYER_TABLE} SET display_name = %s WHERE id = %s"
-        values: tuple[str, int] = (display_name, player_id)
-
-        db_cursor.execute(query, values)
-
-        conn.commit()
-        db_cursor.close()
-        conn.close()
-
-        logging.info(DATABASE_SUCCESS.format(DB_CALL_UPDATE_PLAYER_DISPLAY_NAME))
-    except Exception as e:
-        logging.info(DATABASE_FAIL.format(DB_CALL_UPDATE_PLAYER_DISPLAY_NAME))
-        logging.exception(e)
-        raise Exception(format(e)) from None
+# def db_update_player_display_name(player_id: int, display_name: str) -> None:
+#     try:
+#         logging.info(DATABASE_CALL.format(DB_CALL_UPDATE_PLAYER_DISPLAY_NAME))
+#         conn: connection = db_base_connect()
+#         db_cursor: cursor = conn.cursor()
+#
+#         query: str = f"UPDATE {SCHEMA}.{PLAYER_TABLE} SET display_name = %s WHERE id = %s"
+#         values: tuple[str, int] = (display_name, player_id)
+#
+#         db_cursor.execute(query, values)
+#
+#         conn.commit()
+#         db_cursor.close()
+#         conn.close()
+#
+#         logging.info(DATABASE_SUCCESS.format(DB_CALL_UPDATE_PLAYER_DISPLAY_NAME))
+#     except Exception as e:
+#         logging.info(DATABASE_FAIL.format(DB_CALL_UPDATE_PLAYER_DISPLAY_NAME))
+#         logging.exception(e)
+#         raise Exception(format(e)) from None
