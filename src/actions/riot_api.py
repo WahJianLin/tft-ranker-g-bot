@@ -8,7 +8,7 @@ from requests import Response
 
 from src.actions.database import get_competitors_by_status
 from src.resources.constants import QUEUE_TYPE, RANKED_QUEUE_TYPE, TIER, RANK, \
-    LEAGUE_POINTS, RiotTiersEnum, RiotRanksEnum
+    LEAGUE_POINTS, RiotTiersEnum, RiotRanksEnum, TierToTitleEnum
 from src.resources.entity import PlayerDataRes, LeaderboardEntry, CompetitorV
 from src.resources.logging_constants import RIOT_FAIL, RIOT_ERROR_CODE, RIOT_SUCCESS, RIOT_CALL, \
     RIOT_CALL_GET_RANK_DATA, RIOT_CALL_GET_SUMMONER_ID, RIOT_CALL_GET_PLAYER_DATA_CALL
@@ -91,7 +91,7 @@ def riot_get_rank_data(competitor: CompetitorV) -> LeaderboardEntry | None:
                 rank: str = rank_data[RANK]  # gets rank subdivision
                 points: int = rank_data[LEAGUE_POINTS]  # gets lp value
 
-                tft_rank_title: str = f'{tier} {rank} {points} LP'
+                tft_rank_title: str = f'{TierToTitleEnum[tier].value} {rank} {points} LP'
                 tft_rank_value: int = RiotTiersEnum[tier].value + RiotRanksEnum[rank].value + points
 
                 logging.info(RIOT_SUCCESS)
@@ -126,7 +126,14 @@ def riot_get_ranks() -> list[LeaderboardEntry]:
 # input missing_list -> riot table id, summoner_name, region
 def riot_get_missing_puuid(missing_list: list[tuple[int, str, str]]) -> list[tuple[int, str]]:
     puuid_list: list[tuple[int, str]] = []
-    for entry in missing_list:
-        player_data: PlayerDataRes = riot_get_player_data_call(entry[1], entry[2])
-        puuid_list.append((entry[0], player_data.puuid))
+    try:
+        for entry in missing_list:
+            player_data: PlayerDataRes = riot_get_player_data_call(entry[1], entry[2])
+            logging.info("entry{}", entry)
+            logging.info("player data {}", player_data)
+            if entry[0] is not None and player_data is not None:
+                puuid_list.append((entry[0], player_data.puuid))
+    except Exception as e:
+        logging.exception(e)
+    logging.info("target found here {}", puuid_list)
     return puuid_list

@@ -12,7 +12,7 @@ from src.resources.logging_constants import DATABASE_CALL, DB_CALL_GET_ALL_VALID
     DATABASE_FAIL, DB_CALL_GET_VALID_COMPETITOR_BY_NAME, DB_CALL_GET_VALID_COMPETITORS_BY_NAMES, \
     DB_CALL_UPDATE_PLAYERS_PROCESSED, DB_CALL_INSERT_COMPETITOR, ERROR_EXISTING_SUMMONER, DB_CALL_INSERT_PLAYER, \
     DB_CALL_GET_PLAYER_BY_NAME, DB_CALL_GET_PLAYERS, DB_CALL_UPDATE_PLAYER_STATUS, DB_CALL_GET_RIOT_DATA_BY_ID, \
-    DB_CALL_UPDATE_MISSING_PUUID, DB_CALL_GET_MISSING_PUUID
+    DB_CALL_UPDATE_MISSING_PUUID, DB_CALL_GET_MISSING_PUUID, DB_CALL_UPDATE_PLAYER_DISPLAY_NAME
 
 load_dotenv()
 
@@ -368,3 +368,24 @@ def db_update_player_status(player_id: int, status: PlayerStatusEnum) -> None:
         logging.info(DATABASE_FAIL.format(DB_CALL_UPDATE_PLAYER_STATUS))
         logging.exception(e)
         raise Exception(format(e)) from None
+
+# def db_update_player_display_name(player_id: int, display_name: str) -> None:
+#     try:
+#         logging.info(DATABASE_CALL.format(DB_CALL_UPDATE_PLAYER_DISPLAY_NAME))
+#         conn: connection = db_base_connect()
+#         db_cursor: cursor = conn.cursor()
+#
+#         query: str = f"UPDATE {SCHEMA}.{PLAYER_TABLE} SET display_name = %s WHERE id = %s"
+#         values: tuple[str, int] = (display_name, player_id)
+#
+#         db_cursor.execute(query, values)
+#
+#         conn.commit()
+#         db_cursor.close()
+#         conn.close()
+#
+#         logging.info(DATABASE_SUCCESS.format(DB_CALL_UPDATE_PLAYER_DISPLAY_NAME))
+#     except Exception as e:
+#         logging.info(DATABASE_FAIL.format(DB_CALL_UPDATE_PLAYER_DISPLAY_NAME))
+#         logging.exception(e)
+#         raise Exception(format(e)) from None
