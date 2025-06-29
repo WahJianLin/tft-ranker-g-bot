@@ -11,7 +11,8 @@ from src.resources.entity import Player, CompetitorV, PlayerRiotData
 from src.resources.logging_constants import DATABASE_CALL, DB_CALL_GET_ALL_VALID_COMPETITOR, DATABASE_SUCCESS, \
     DATABASE_FAIL, DB_CALL_GET_VALID_COMPETITOR_BY_NAME, DB_CALL_GET_VALID_COMPETITORS_BY_NAMES, \
     DB_CALL_UPDATE_PLAYERS_PROCESSED, DB_CALL_INSERT_COMPETITOR, ERROR_EXISTING_SUMMONER, DB_CALL_INSERT_PLAYER, \
-    DB_CALL_GET_PLAYER_BY_NAME, DB_CALL_GET_PLAYERS, DB_CALL_UPDATE_PLAYER_STATUS, DB_CALL_GET_RIOT_DATA_BY_ID
+    DB_CALL_GET_PLAYER_BY_NAME, DB_CALL_GET_PLAYERS, DB_CALL_UPDATE_PLAYER_STATUS, DB_CALL_GET_RIOT_DATA_BY_ID, \
+    DB_CALL_UPDATE_MISSING_PUUID, DB_CALL_GET_MISSING_PUUID
 
 load_dotenv()
 
@@ -135,7 +136,7 @@ def get_competitors_by_status() -> list[CompetitorV] | None:
         records: list[tuple[any, ...]] = db_cursor.fetchall()
         for comp_tpl in records:
             competitor: CompetitorV = CompetitorV(comp_tpl[0], comp_tpl[1], comp_tpl[2],
-                                                  PlayerStatusEnum(comp_tpl[3]), comp_tpl[4])
+                                                  PlayerStatusEnum(comp_tpl[3]), comp_tpl[4], comp_tpl[5])
             competitor_list.append(competitor)
         db_cursor.close()
         conn.close()
@@ -190,7 +191,7 @@ def get_player_riot_data_by_id(player_id: int) -> PlayerRiotData | None:
             logging.info(DATABASE_SUCCESS.format(DB_CALL_GET_RIOT_DATA_BY_ID))
             return None
 
-        player_riot_data: PlayerRiotData = PlayerRiotData(record[0], record[1], record[2])
+        player_riot_data: PlayerRiotData = PlayerRiotData(record[0], record[1], None, record[2])
         logging.info(DATABASE_SUCCESS.format(DB_CALL_GET_RIOT_DATA_BY_ID))
         return player_riot_data
     except Exception as e:
@@ -208,13 +209,13 @@ def get_player_riot_data_by_ids(player_ids: list[int]) -> list[PlayerRiotData] |
         player_riot_data_list: list[PlayerRiotData] = []
 
         format_strings = ','.join(['%s'] * len(player_ids))
-        query: str = f"SELECT * FROM {SCHEMA}.{RIOT_DATA_TABLE} WHERE player_id IN (%s)" % format_strings
+        query: str = f"SELECT id, player_id, puuid FROM {SCHEMA}.{RIOT_DATA_TABLE} WHERE player_id IN (%s)" % format_strings
         db_cursor.execute(query, tuple(player_ids))
         records: list[tuple[any, ...]] = db_cursor.fetchall()
 
         for player_data_tpl in records:
             player_data: PlayerRiotData = PlayerRiotData(player_data_tpl[0], player_data_tpl[1],
-                                                         player_data_tpl[2])
+                                                         None, player_data_tpl[2])
             player_riot_data_list.append(player_data)
 
         db_cursor.close()
@@ -224,6 +225,27 @@ def get_player_riot_data_by_ids(player_ids: list[int]) -> list[PlayerRiotData] |
         return player_riot_data_list
     except Exception as e:
         logging.info(DATABASE_FAIL.format(DB_CALL_GET_VALID_COMPETITORS_BY_NAMES))
+        logging.exception(e)
+        raise Exception(format(e)) from None
+
+
+def get_missing_puuid() -> list[tuple[int, str, str]]:
+    try:
+        logging.info(DATABASE_CALL.format(DB_CALL_GET_MISSING_PUUID))
+        conn: connection = db_base_connect()
+        db_cursor: cursor = conn.cursor()
+
+        query: str = f"SELECT rd.id, pl.summoner_name, pl.region FROM {SCHEMA}.{PLAYER_TABLE} AS pl JOIN {SCHEMA}.{RIOT_DATA_TABLE} AS rd on pl.id = rd.player_id WHERE rd.puuid IS NULL"
+        db_cursor.execute(query)
+        records: list[tuple[any, ...]] = db_cursor.fetchall()
+
+        missing_list: list[tuple[int, str, str]] = [(record[0], record[1], record[2]) for record in records]
+        db_cursor.close()
+        conn.close()
+
+        logging.info(DATABASE_SUCCESS.format(DB_CALL_GET_MISSING_PUUID))
+        return missing_list
+    except Exception as e:
         logging.exception(e)
         raise Exception(format(e)) from None
 
@@ -283,7 +305,7 @@ def insert_player_riot_data(competitors_list: list[tuple[int, str]]) -> None:
         logging.info(DATABASE_CALL.format(DB_CALL_INSERT_COMPETITOR))
         conn: connection = db_base_connect()
         db_cursor: cursor = conn.cursor()
-        query: str = f"INSERT INTO {SCHEMA}.{RIOT_DATA_TABLE}(player_id, summoner_id)	VALUES "
+        query: str = f"INSERT INTO {SCHEMA}.{RIOT_DATA_TABLE}(player_id, puuid)	VALUES "
         args_str = ','.join(
             db_cursor.mogrify("(%s, %s)", competitor).decode('utf-8') for competitor in
             competitors_list)
@@ -297,6 +319,31 @@ def insert_player_riot_data(competitors_list: list[tuple[int, str]]) -> None:
         logging.info(DATABASE_SUCCESS.format(DB_CALL_INSERT_COMPETITOR))
     except Exception as e:
         logging.info(DATABASE_FAIL.format(DB_CALL_INSERT_COMPETITOR))
+        logging.exception(e)
+        raise Exception(format(e)) from None
+
+
+def update_missing_puuid(puuid_list: list[tuple[int, str]]) -> None:
+    try:
+        logging.info(DATABASE_CALL.format(DB_CALL_UPDATE_MISSING_PUUID))
+        conn: connection = db_base_connect()
+        db_cursor: cursor = conn.cursor()
+
+        args_str = ','.join(
+            db_cursor.mogrify("(%s, %s)", tpl).decode('utf-8') for tpl in
+            puuid_list)
+
+        query = f"UPDATE {SCHEMA}.{RIOT_DATA_TABLE} AS rd SET puuid = v.puuid FROM (VALUES {args_str}) AS v(id, puuid) WHERE rd.id = v.id;"
+
+        db_cursor.execute(query)
+
+        conn.commit()
+        db_cursor.close()
+        conn.close()
+
+        logging.info(DATABASE_SUCCESS.format(DB_CALL_UPDATE_MISSING_PUUID))
+    except Exception as e:
+        logging.info(DATABASE_FAIL.format(DB_CALL_UPDATE_MISSING_PUUID))
         logging.exception(e)
         raise Exception(format(e)) from None
 

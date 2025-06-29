@@ -25,10 +25,11 @@ DB_CALL_GET_ALL_VALID_COMPETITOR: str = 'get_valid_competitor'
 DB_CALL_GET_VALID_COMPETITOR_BY_NAME: str = 'get_competitor_by_summoner_name'
 DB_CALL_GET_RIOT_DATA_BY_ID: str = 'get_player_riot_data_by_id'
 DB_CALL_GET_VALID_COMPETITORS_BY_NAMES: str = 'get_competitors_by_summoner_names'
+DB_CALL_GET_MISSING_PUUID: str = 'get_missing_puuid'
 
 DB_CALL_UPDATE_PLAYERS_PROCESSED: str = 'update_player_processed'
 DB_CALL_UPDATE_PLAYER_STATUS: str = 'update_player_status'
-
+DB_CALL_UPDATE_MISSING_PUUID: str = 'update_missing_puuid'
 
 DB_CALL_INSERT_PLAYER: str = 'insert_player'
 DB_CALL_INSERT_COMPETITOR: str = 'insert_competitor'

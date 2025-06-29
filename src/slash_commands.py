@@ -6,10 +6,10 @@ import discord
 from discord.ext import commands
 
 from src.actions.data_actions import get_leaderboard_result, process_waitlist, get_player_by_status, register_player, \
-    update_participation, generate_help_text
+    update_participation, generate_help_text, update_for_missing_puuid
 from src.actions.database import get_player_by_summoner_name
 from src.actions.permission import is_mod
-from src.actions.riot_api import get_player_data_call
+from src.actions.riot_api import riot_get_player_data_call
 from src.resources.constants import REGION_MAP, SlashCommands, ONLY_MODS, VALID_SUMMONER_NAME_REGEX, ServerLocationEnum, \
     PlayerStatusEnum, CommandNameEnum, CommandDescriptionEnum
 from src.resources.logging_constants import SLASH_COMMANDS, COMMAND_SUCCESS, COMMAND_FAIL, COMMAND_ERROR_UNEXPECTED, \
@@ -19,6 +19,7 @@ from src.resources.logging_constants import SLASH_COMMANDS, COMMAND_SUCCESS, COM
 
 async def test_command(interaction: discord.Interaction):
     logging.info(SLASH_COMMANDS.format(SlashCommands.TEST.value))
+    update_for_missing_puuid()
     await interaction.response.send_message("hello ajumma world")
 
 
@@ -38,7 +39,6 @@ async def mod_get_leaderboard_command(interaction: discord.Interaction):
         logging.exception(e)
         await interaction.response.send_message(COMMAND_ERROR_UNEXPECTED,
                                                 ephemeral=True)
-
 
 async def join_ranked_race_command(interaction: discord.Interaction, summoner_name: str, server: ServerLocationEnum,
                                    display_name: str | None, is_streamer: bool = False):
@@ -60,7 +60,7 @@ async def join_ranked_race_command(interaction: discord.Interaction, summoner_na
                 ERROR_EXISTING_SUMMONER.format(summoner_name),
                 ephemeral=True)
         # To Do filter out malicious display names
-        elif get_player_data_call(summoner_name, REGION_MAP[server]):
+        elif riot_get_player_data_call(summoner_name, REGION_MAP[server]):
             await interaction.response.defer()
             await asyncio.sleep(5)
             # registers player
@@ -81,7 +81,6 @@ async def join_ranked_race_command(interaction: discord.Interaction, summoner_na
         await interaction.response.send_message(
             COMMAND_ERROR_UNEXPECTED,
             ephemeral=True)
-
 
 async def mod_process_registered_players_command(interaction: discord.Interaction):
     try:
@@ -125,8 +124,9 @@ async def mod_get_players_by_status_command(interaction: discord.Interaction, st
 async def update_participation_command(interaction: discord.Interaction, summoner_name: str, participation: bool):
     try:
         logging.info(SLASH_COMMANDS.format(SlashCommands.UPDATE_PARTICIPATION.value))
-        await interaction.response.send_message(update_participation(summoner_name.lower(), participation, interaction.user.id),
-                                                ephemeral=True)
+        await interaction.response.send_message(
+            update_participation(summoner_name.lower(), participation, interaction.user.id),
+            ephemeral=True)
     except Exception as e:
         logging.info(SLASH_COMMANDS.format(COMMAND_FAIL))
         logging.exception(e)
@@ -137,6 +137,7 @@ async def update_participation_command(interaction: discord.Interaction, summone
 async def help_command(interaction: discord.Interaction):
     logging.info(SLASH_COMMANDS.format(SlashCommands.HELP.value))
     await interaction.response.send_message(generate_help_text(is_mod(interaction.user.roles)))
+
 
 # TODO look to use annotation instead of set up below. If it is worth the time.
 def setup(client: commands.Bot):

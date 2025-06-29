@@ -6,7 +6,7 @@ from src.resources.constants import PlayerStatusEnum
 
 @dataclass
 class Player:
-    id: int
+    id: int | None
     summoner_name: str
     display_name: str
     region: str
@@ -22,7 +22,8 @@ class Player:
 class PlayerRiotData:
     id: int
     player_id: int
-    summoner_id: str
+    summoner_id: str | None
+    puuid: str | None
 
 
 @dataclass
@@ -31,7 +32,8 @@ class CompetitorV:
     display_name: str
     riot_server: str
     player_status: PlayerStatusEnum
-    summoner_id: str
+    summoner_id: str | None
+    puuid: str | None
 
 
 @dataclass

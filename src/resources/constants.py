@@ -124,21 +124,24 @@ class ParticipationResponseEnum:
     NO_PLAYER = 'Failure: Summoner account needs to be registered'
     NOT_CORRECT_DISCORD_ID = 'Failure: Summoner account was registered by a different discord user'
 
+
 class CommandNameEnum:
-    MOD_LEADERBOARD= 'mod_leaderboard'
-    MOD_PROCESS_WAIT_LIST= 'mod_process_players_wait_list'
+    MOD_LEADERBOARD = 'mod_leaderboard'
+    MOD_PROCESS_WAIT_LIST = 'mod_process_players_wait_list'
     MOD_PLAYERS_BY_STATUS = 'mod_get_players_by_status'
-    REGISTER_FOR_RACE= 'join_ranked_race'
-    PLAYER_PARTICIPATION= 'player_participation'
+    REGISTER_FOR_RACE = 'join_ranked_race'
+    PLAYER_PARTICIPATION = 'player_participation'
     HELP = 'help'
 
+
 class CommandDescriptionEnum:
-    MOD_LEADERBOARD= 'Generate current leaderboard'
-    MOD_PROCESS_WAIT_LIST='Process waitlist of players and let players into race'
+    MOD_LEADERBOARD = 'Generate current leaderboard'
+    MOD_PROCESS_WAIT_LIST = 'Process waitlist of players and let players into race'
     MOD_PLAYERS_BY_STATUS = 'Grabs list of players based on status'
-    REGISTER_FOR_RACE= 'Register for ranked racing using your summoner name (EX: Player#123) and server (EX: NA)'
-    PLAYER_PARTICIPATION= 'Allows Players to update their participation status in race'
+    REGISTER_FOR_RACE = 'Register for ranked racing using your summoner name (EX: Player#123) and server (EX: NA)'
+    PLAYER_PARTICIPATION = 'Allows Players to update their participation status in race'
     HELP = 'Shows all commands'
+
 
 MOD_HELP: str = f"""
 Mod Commands:

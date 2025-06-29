@@ -21,10 +21,12 @@ GET_ACCOUNT_DATA_URL: str = 'https://{}.api.riotgames.com/riot/account/v1/accoun
 
 GET_RANK_DATA_URL: str = 'https://{}.api.riotgames.com/tft/league/v1/entries/by-summoner/{}?api_key={}'
 
+GET_RANK_DATA_BY_PUUID_URL: str = 'https://{}.api.riotgames.com/tft/league/v1/by-puuid/{}?api_key={}'
+
 GET_SUMMONER_DATA_URL: str = 'https://{}.api.riotgames.com/tft/summoner/v1/summoners/by-puuid/{}?api_key={}'
 
 
-def get_player_data_call(summoner_name: str, region: str) -> PlayerDataRes or None:
+def riot_get_player_data_call(summoner_name: str, region: str) -> PlayerDataRes or None:
     split_name: list[str] = summoner_name.split('#')
     game_name: str = split_name[0]
     tag_line: str = split_name[1]
@@ -47,7 +49,8 @@ def get_player_data_call(summoner_name: str, region: str) -> PlayerDataRes or No
         return None
 
 
-def get_summoner_id_call(puuid: str, server: str) -> str | None:
+# deprecated
+def riot_get_summoner_id_call(puuid: str, server: str) -> str | None:
     url = GET_SUMMONER_DATA_URL.format(server, puuid, RIOT_API_KEY)
     try:
         logging.info(RIOT_CALL.format(RIOT_CALL_GET_SUMMONER_ID))
@@ -67,8 +70,8 @@ def get_summoner_id_call(puuid: str, server: str) -> str | None:
         return None
 
 
-def get_rank_data(competitor: CompetitorV) -> LeaderboardEntry | None:
-    url = GET_RANK_DATA_URL.format(competitor.riot_server, competitor.summoner_id, RIOT_API_KEY)
+def riot_get_rank_data(competitor: CompetitorV) -> LeaderboardEntry | None:
+    url = GET_RANK_DATA_BY_PUUID_URL.format(competitor.riot_server, competitor.puuid, RIOT_API_KEY)
     try:
         logging.info(RIOT_CALL.format(RIOT_CALL_GET_RANK_DATA))
         response: Response = requests.get(url)
@@ -107,13 +110,23 @@ def get_rank_data(competitor: CompetitorV) -> LeaderboardEntry | None:
         return None
 
 
-def get_ranks() -> list[LeaderboardEntry]:
+def riot_get_ranks() -> list[LeaderboardEntry]:
     leaderboard_entries: list[LeaderboardEntry] = []
     valid_competitors: list[CompetitorV] = get_competitors_by_status()
 
     for competitor in valid_competitors:
-        leaderboard_entry: LeaderboardEntry = get_rank_data(competitor)
+        leaderboard_entry: LeaderboardEntry = riot_get_rank_data(competitor)
         if leaderboard_entry:
             leaderboard_entries.append(leaderboard_entry)
 
     return leaderboard_entries
+
+
+# method should not be used often. returns riot table id and puuid.
+# input missing_list -> riot table id, summoner_name, region
+def riot_get_missing_puuid(missing_list: list[tuple[int, str, str]]) -> list[tuple[int, str]]:
+    puuid_list: list[tuple[int, str]] = []
+    for entry in missing_list:
+        player_data: PlayerDataRes = riot_get_player_data_call(entry[1], entry[2])
+        puuid_list.append((entry[0], player_data.puuid))
+    return puuid_list
